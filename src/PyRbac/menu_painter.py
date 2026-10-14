@@ -128,6 +128,7 @@ class MenuPainter:
         (75, "dict-add", "add a dictionary value", "dict-add"),
         (76, "notice-list", "notices", "notice-list"),
         (77, "notice-add", "add a notice", "notice-add"),
+        (78, "db-engine", "sqlite3 file or mysql", "db-engine"),
         (0, "Back", "return to the main menu", "back"),
     )
     AUDIT_ROWS = (
@@ -192,6 +193,7 @@ class MenuPainter:
         "dict-add": "dict-add",
         "notice-list": "notice-list",
         "notice-add": "notice-add",
+        "db-engine": "db-engine",
         "oper-log": "oper-log",
         "login-log": "login-log",
         "online-list": "online-list",

@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-project-structure.md
-**Status**: Active (Version 1.1.1)
+**Status**: Retired (Version 1.1.1)
 **Area**: python
 **Key**: `requirement-python-project-structure`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-project-structure`.
 
 ## 1. Purpose
 
@@ -41,6 +43,7 @@ The installable package is `src/PyRbac`. Tests live in `tests/`. Product law tha
 | 2026-10-04 | Active 1.0.0 | Earlier package path |
 | 2026-10-11 | Active 1.1.0 | `src/PyRbac` and `reviews/` |
 | 2026-10-11 | Active 1.1.1 | `./build.sh` is tracked. Commands live on `requirement-python-build-script` |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-project-structure` |
 
 ---
 

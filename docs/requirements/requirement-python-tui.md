@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-tui.md
-**Status**: Active (Version 1.2.0)
+**Status**: Retired (Version 1.2.0)
 **Area**: python
 **Key**: `requirement-python-tui`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-tui`.
 
 ## 1. Purpose
 
@@ -71,6 +73,7 @@ Empty arguments on a terminal ask for an account name and a password, then open 
 | 2026-10-04 | Active 1.0.0 | Inherited frame, path, clock, and columns |
 | 2026-10-11 | Active 1.1.0 | Session, access, setup, audit, and serve join the front board |
 | 2026-10-11 | Active 1.2.0 | Sign-in before the menu. The session row is gone. Numbers 2–9 stay |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-tui` |
 
 ---
 

@@ -1,20 +1,7 @@
-# Tests — PyRbac
+# Tests
 
-Executable proof for product law. The public plan is `reviews/test-plan.md`.
+The ship suite is `cargo test`, which `tests/run.sh` starts.
 
-## Run
+`tests/product.rs` covers the RustRbac identity, the sqlite seed, data scope, the web cookie, the menu language, and the path line. A mysql case runs only when `~/.local/RustRbac/database` is mode 0600 and names `rust_rbac_test`. It does not open `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`.
 
-```bash
-./tests/run.sh
-```
-
-RBAC cases use MariaDB database `pyrbac_test`. They do not write `ruoyi_db` or `ry`.
-
-| File | What it proves |
-|------|----------------|
-| `test_tui.py` | Path label and wide columns |
-| `test_language.py` | Row 4, codes 41–53, `PYRBAC_LANG` |
-| `test_hello.py` | Front board and the menu gate |
-| `test_about.py` | About page and host check |
-| `test_rbac.py` | Scope, web cookie, CSRF, environment, ChronicleLogger |
-| `test_docs.py` | README headings and absolute screenshot URLs |
+The Python files `test_*.py` are the previous edition. They are not the ship suite.

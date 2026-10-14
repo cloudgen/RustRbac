@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-packaging.md
-**Status**: Active (Version 1.3.2)
+**Status**: Retired (Version 1.3.2)
 **Area**: python
 **Key**: `requirement-python-packaging`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-packaging`.
 
 ## 1. Purpose
 
@@ -43,6 +45,7 @@
 | 2026-10-11 | Active 1.3.0 | PyRbac 1.0.0, `py-rbac`, PyMySQL |
 | 2026-10-11 | Active 1.3.1 | Maintainer commands point at `requirement-python-build-script` |
 | 2026-10-11 | Active 1.3.2 | Product version 1.0.1 |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-packaging` |
 
 ---
 

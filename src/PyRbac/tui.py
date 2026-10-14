@@ -303,29 +303,44 @@ class Tui:
             except Exception as exc:
                 error = str(exc)
 
+    def _menu_engine(self, screen, model):
+        """Ask for sqlite3 or mysql. Esc returns None. Enter keeps the current engine."""
+        while True:
+            lines = list(self.app.desk.settings.choice_lines())
+            lines.append("1 sqlite3 file, 2 mysql, or Enter to keep. Esc leaves.")
+            text = self.read_key(screen, model, lines, title="database")
+            if text is None:
+                return None
+            try:
+                return self.app.desk.settings.apply_choice(text.strip())
+            except Exception as exc:
+                nxt = getattr(exc, "nxt", "py-rbac db-engine")
+                self.notice(
+                    screen,
+                    model,
+                    ["ERROR: {0}".format(exc), "Next: {0}".format(nxt)],
+                    title="database",
+                    closing="Press a key to choose again.",
+                )
+
     def open_text_menu(self):
         """
-        General Purpose: Initialize a missing database, ask for a sign-in,
-        then draw the front board. Does not run pip. Returns "missing"
-        when the screen cannot open or the database cannot be prepared.
+        General Purpose: Ask for the database engine, initialize a missing
+        database, ask for a sign-in, then draw the front board. Does not run
+        pip. Returns "missing" when the screen cannot open or the database
+        cannot be prepared.
         """
         if not self._require_terminal():
             return "missing"
         if self.app is None or getattr(self.app, "desk", None) is None:
             return self._screen_error(False)
         try:
-            state = self.app.desk.ensure_database()
-            database_name = self.app.desk.settings.database()["database"]
-        except Exception as exc:
-            nxt = getattr(exc, "nxt", "py-rbac db-init")
-            self.app.report_error(str(exc), nxt)
-            return "missing"
-        try:
             import curses
         except ImportError:
             return self._screen_error(False)
 
         screen_box = {}
+        error_box = {}
 
         def on_kind(kind):
             if kind == "help":
@@ -365,6 +380,14 @@ class Tui:
 
         def _wrapped(screen):
             screen_box["screen"] = screen
+            try:
+                if self._menu_engine(screen, session.model) is None:
+                    return
+                state = self.app.desk.ensure_database()
+                database_name = self.app.desk.settings.storage_label()
+            except Exception as exc:
+                error_box["exc"] = exc
+                return
             signed_in = self.login_gate(
                 lambda lines: self._ask_fields(
                     screen, session.model, "login", self.ASKS["login"],
@@ -382,6 +405,11 @@ class Tui:
             return self._screen_error(True)
         except Exception:
             return self._screen_error(False)
+        if "exc" in error_box:
+            exc = error_box["exc"]
+            nxt = getattr(exc, "nxt", "py-rbac db-init")
+            self.app.report_error(str(exc), nxt)
+            return "missing"
         return None
 
     def open_direct(self, kind):
@@ -522,6 +550,7 @@ class Tui:
         "login-log",
         "online-list",
         "online-logout",
+        "db-engine",
     )
     ASKS = {
         "login": (("user_name", "user_name", False), ("password", "password", True)),
@@ -592,6 +621,8 @@ class Tui:
         """General Purpose: The same Desk verb the command line runs."""
         if self.app is None or getattr(self.app, "desk", None) is None:
             return "ERROR: This menu has no command desk.\nNext: py-rbac help"
+        if kind == "db-engine":
+            return self._menu_engine(screen, model)
         options = SimpleNamespace()
         fields = self.ASKS.get(kind)
         if fields:

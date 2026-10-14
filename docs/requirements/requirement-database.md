@@ -1,37 +1,39 @@
 **file**: docs/requirements/requirement-database.md
-**Status**: Active (Version 1.3.0)
+**Status**: Active (Version 2.0.2)
 **Area**: domain
 **Key**: `requirement-database`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
 
-PyRbac stores its RBAC tables in MariaDB or MySQL. The product database is `pyrbac`. Tests use `pyrbac_test`. Existing databases, including `ruoyi_db` and `ry`, are not this product's schema and **MUST NOT** be written.
+RustRbac stores its RBAC tables in sqlite3 or in MariaDB or MySQL. The default engine is sqlite3. The sqlite file is `rust_rbac.sqlite3`, mode `0600`, in the home directory `~/.local/RustRbac` (mode `0700`). mysql uses the database named by `RUSTRBAC_DB_NAME`. The product mysql database is `rust_rbac`. mysql tests use `rust_rbac_test`. MySQL users are `rust_rbac`@localhost and `rust_rbac`@127.0.0.1, granted only on `rust_rbac.*` and `rust_rbac_test.*`. The product **MUST NOT** open or write `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`.
 
-`user_name` is the login, and there is no password salt column. The password column is `VARCHAR(255)` because this product stores PBKDF2. Online sessions are `sys_session`. This product does not use Redis.
+`user_name` is the login, and there is no password salt column. The password column is `VARCHAR(255)`. The stored scheme is `pbkdf2_sha256` with 260000 iterations. Online sessions are `sys_session`. This product does not use Redis. The writer is the Rust store (`rusqlite` and the `mysql` crate).
 
 This file is the structure. Who may see a department, and which menu string allows an action, stay on `requirement-rbac`.
 
 ### 1.1 Human-facing
 
-**In one sentence:** A run that needs the database creates these tables when they are missing and fills them only when no user exists yet. `py-rbac db-init` does the same and prints the result.
+**In one sentence:** A run that needs the database creates these tables when they are missing and fills them only when no user exists yet. The default store is the sqlite3 file. `rust-rbac db-init` prints `Database {label}: seeded.` or `Database {label}: present.`
 
 | Box | Meaning | Example |
 |-----|---------|---------|
-| You / this login | The operator with a database password | `py-rbac` on a terminal, or `py-rbac db-init` |
-| The other role | The database account `pyrbac`@localhost | It can use only `pyrbac` and `pyrbac_test` |
+| You / this login | The operator | `rust-rbac` on a terminal, or `rust-rbac db-init` |
+| The other role | `rust_rbac`@localhost and `rust_rbac`@127.0.0.1 | Granted only on `rust_rbac.*` and `rust_rbac_test.*` |
 | Not this file | Which departments a user may see | `requirement-rbac` |
 
 | Includes | Excludes |
 |----------|----------|
 | The columns, keys, and join columns in section 1.2 | A foreign-key constraint |
-| Parameterized SQL through PyMySQL | String-built SQL from a typed name |
+| `?` placeholders through the Rust store (`rusqlite` and the `mysql` crate) | String-built SQL from a typed name |
+| Choice 1 sqlite3, including the default file, and choice 2 mysql | A third database engine |
 | Create-if-missing, then seed-if-empty | A second seed that duplicates admin |
 | `sys_session` for online users | Redis |
+| Refusal of `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, and `ry` | Opening or writing those names |
 
 ### 1.2 Structure
 
-`db-init` creates each table with `CREATE TABLE IF NOT EXISTS`. An existing table is left as it is. Every table uses `ENGINE=InnoDB` and `DEFAULT CHARSET=utf8mb4`. No statement declares a `FOREIGN KEY`. The lines in the diagram are the columns the queries join.
+`db-init` creates each table with `CREATE TABLE IF NOT EXISTS`. An existing table is left as it is. On mysql, every table uses `ENGINE=InnoDB` and `DEFAULT CHARSET=utf8mb4`. On sqlite3, the same columns and keys are created without an engine clause and without a charset clause. An `AUTO_INCREMENT` key is `INTEGER PRIMARY KEY AUTOINCREMENT` on sqlite3. No statement declares a `FOREIGN KEY`. The lines in the diagram are the columns the queries join.
 
 A repeated `status` of `'0'` means normal. A user status of `'1'` means disabled. A `del_flag` of `'0'` means the row is listed. A `del_flag` of `'2'` means it was removed. `sys_menu` has no `del_flag`. Its `status` is the on/off column. `data_scope` is stored here. The meaning of 1, 2, 3, and 4 is `requirement-rbac`.
 
@@ -75,7 +77,7 @@ erDiagram
 | update_by | VARCHAR(64) NOT NULL | default `''` |
 | update_time | DATETIME | NULL |
 
-`sys_user` — one account. `user_name` is the login. `password` holds `pbkdf2_sha256$…` and is VARCHAR(255). There is no salt column.
+`sys_user` — one account. `user_name` is the login. `password` is `VARCHAR(255)` and holds `pbkdf2_sha256` with 260000 iterations. There is no salt column. The salt travels inside the stored string.
 
 | Column | Type | Key / default |
 |--------|------|----------------|
@@ -291,30 +293,37 @@ Each link table is only the two ids. The pair is the primary key.
 
 ## 2. Normative rules
 
-1. **Schemas.** The product **MUST** use the database named by `PYRBAC_DB_NAME`. The default is `pyrbac`. Tests **MUST** set `pyrbac_test`. The product **MUST NOT** open `ruoyi_db` or `ry` as its working database.
-2. **Privilege.** The database account **MUST** be limited to `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `DROP`, `INDEX`, and `ALTER` on `pyrbac` and `pyrbac_test`.
-3. **Statements.** Every value **MUST** be a parameter. An error returned to the operator **MUST NOT** include the SQL text or the password.
+1. **Engine.** The engine **MUST** be `sqlite3` or `mysql`. An empty `RUSTRBAC_DB_ENGINE` **MUST** mean sqlite3. Choice 1 is sqlite3. Choice 2 is mysql. The sqlite3 file **MUST** default to `rust_rbac.sqlite3` in `~/.local/RustRbac` from `requirement-environment`. `RUSTRBAC_SQLITE_FILE` **MUST** replace that path when it is set. mysql **MUST** use the database named by `RUSTRBAC_DB_NAME`. The default name is `rust_rbac`. mysql tests **MUST** set `rust_rbac_test`. The product **MUST NOT** open or write `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`.
+2. **Privilege.** The MySQL users `rust_rbac`@localhost and `rust_rbac`@127.0.0.1 **MUST** be granted only on `rust_rbac.*` and `rust_rbac_test.*`. The grants **MUST** stay within `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `DROP`, `INDEX`, and `ALTER`. The sqlite3 file **MUST** be mode `0600`. The home directory **MUST** be mode `0700`. A password **MUST** be required for mysql and **MUST NOT** be required for sqlite3. There is no password default.
+3. **Statements.** The writer **MUST** be the Rust store (`rusqlite` and the `mysql` crate). Every value **MUST** be a `?` placeholder. `FIND_IN_SET` and `NOW()` **MUST** be rewritten only for sqlite. An error returned to the operator **MUST NOT** include the SQL text or the password.
 4. **Tables.** `db-init` **MUST** create `sys_dept`, `sys_user`, `sys_post`, `sys_role`, `sys_menu`, `sys_user_role`, `sys_role_menu`, `sys_role_dept`, `sys_user_post`, `sys_oper_log`, `sys_dict_type`, `sys_dict_data`, `sys_config`, `sys_logininfor`, `sys_notice`, and `sys_session` when they are missing.
-5. **Shape.** A table created by `db-init` **MUST** use InnoDB and `utf8mb4` and **MUST** have the columns and keys in section 1.2. `db-init` **MUST NOT** declare a foreign key. `db-init` **MUST NOT** change a table that already exists.
-6. **Seed once.** When `sys_user` has any row, `db-init` **MUST** return `present` and **MUST NOT** insert another admin. The first empty run **MUST** return `seeded`.
-7. **Automatic init.** The text menu, `serve`, and every domain verb **MUST** call the same init as `db-init` when the tables are missing or `sys_user` is empty. That call **MUST** happen before the sign-in question and before the verb body. A later call **MUST** return `present` and **MUST NOT** insert another administrator. `help`, `version`, `about`, and the pip verbs **MUST NOT** open the database. A connection failure **MUST** still name the settings to check. `db-init` **MUST** remain and **MUST** print `seeded` or `present`.
+5. **Shape.** A mysql table created by `db-init` **MUST** use InnoDB and `utf8mb4` and **MUST** have the columns and keys in section 1.2. A sqlite3 table **MUST** have those columns and keys, with `INTEGER PRIMARY KEY AUTOINCREMENT` where section 1.2 says `AUTO_INCREMENT`, and **MUST NOT** declare an engine or a charset. `db-init` **MUST NOT** declare a foreign key. `db-init` **MUST NOT** change a table that already exists.
+6. **Seed once.** When `sys_user` has any row, `db-init` **MUST** print `Database {label}: present.` and **MUST NOT** insert another admin. The first empty run **MUST** print `Database {label}: seeded.` For sqlite, `{label}` **MUST** be the file path. For mysql, `{label}` **MUST** be the database name.
+7. **Automatic init.** The text menu, `serve`, and every domain verb **MUST** call the same init as `db-init` when the tables are missing or `sys_user` is empty. On the text menu that call **MUST** happen before the saved sign-in is tried and before any account question. That path uses the current engine. The default is the sqlite3 file. It **MUST NOT** ask for an engine. On a domain verb it **MUST** happen before the verb body. A later call **MUST** print `Database {label}: present.` and **MUST NOT** insert another administrator. `help`, `version`, `about`, `db-engine`, and the self-management verbs **MUST NOT** open the database. A connection failure **MUST** still name the settings to check. `db-init` **MUST** remain and **MUST** print `Database {label}: seeded.` or `Database {label}: present.`
+8. **Choice.** The command `db-engine`, setup row 218, the web sign-in page, and the signed-in Database page **MUST** each offer choice 1 sqlite3, including the default file path, and choice 2 mysql. An empty choice **MUST** keep the current engine. The environment **MUST** win over the mode-0600 file. A web sign-in from a non-loopback address **MUST NOT** switch the engine. `RUSTRBAC_ALLOW_REMOTE` is environment-only and is not a database setting. The text menu before sign-in does not offer that choice. The saved sign-in is `requirement-local-login`.
 
 ## 3. Acceptance checks
 
 | ID | Check |
 |----|-------|
-| AC-1 | The first `db-init` on an empty `pyrbac_test` reports seeded |
-| AC-2 | The second `db-init` reports present |
+| AC-1 | The first `db-init` on an empty sqlite3 file prints `Database {path}: seeded.` |
+| AC-2 | The second `db-init` prints `Database {path}: present.` |
 | AC-3 | A failed statement does not echo the password |
 | AC-4 | A domain verb on a database with no tables seeds once, then continues |
+| AC-5 | Choice 1 selects the default sqlite3 file and choice 2 selects mysql |
+| AC-6 | The sqlite3 file is mode 0600 and the home directory is mode 0700 |
+| AC-7 | Opening `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry` is refused |
 
 ## Terminologies
 
 | Term | Meaning in this file |
 |------|----------------------|
-| Product database | The schema named `pyrbac` unless `PYRBAC_DB_NAME` says otherwise |
-| Test database | `pyrbac_test` |
+| Product database | sqlite3 file `rust_rbac.sqlite3`, or the mysql schema named `rust_rbac` unless `RUSTRBAC_DB_NAME` says otherwise |
+| Default file | `rust_rbac.sqlite3` in `~/.local/RustRbac` when `RUSTRBAC_SQLITE_FILE` is empty |
+| Test database | A temporary sqlite3 file, or mysql `rust_rbac_test` when that engine is under test |
+| Denied name | `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`. The product does not open or write them |
 | Seed | The first English rows inserted only into an empty `sys_user` |
+| Seed message | `Database {label}: seeded.` or `Database {label}: present.` |
 | Link table | A two-column table whose pair of ids is the primary key |
 | Structure | The columns, keys, engine, and charset in section 1.2 |
 
@@ -325,10 +334,14 @@ Each link table is only the two ids. The pair is the primary key.
 | 2026-10-11 | Active 1.0.0 | Dedicated MariaDB schemas and FastAPI-shaped tables |
 | 2026-10-11 | Active 1.1.0 | Column lists, keys, and the join diagram |
 | 2026-10-11 | Active 1.2.0 | A menu, serve, or domain verb initializes a missing database |
+| 2026-10-11 | Active 1.3.0 | sqlite3 default file and mysql. The same choice on the command, the menu, and the web page |
 | 2026-10-11 | Active 1.3.0 | The table text names this product only |
+| 2026-10-11 | Active 2.0.0 | RustRbac, `rust_rbac`, `RUSTRBAC_*`. Denied names include `pyrbac`. Rust store. Seed message names the label |
+| 2026-10-11 | Active 2.0.1 | The text menu uses the current engine and does not ask for one before sign-in |
+| 2026-10-14 | Active 2.0.2 | The menu engine choice is setup row 218 |
 
 ---
 
-**Last Updated**: 2026-10-11
+**Last Updated**: 2026-10-14
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

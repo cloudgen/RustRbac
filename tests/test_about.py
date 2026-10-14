@@ -78,7 +78,7 @@ class TestAbout(unittest.TestCase):
             "Domain: Online RBAC and centralized configuration",
             text,
         )
-        self.assertIn("Runtime tools: MariaDB or MySQL, PyMySQL", text)
+        self.assertIn("Runtime tools: sqlite3 (default file) or MariaDB or MySQL, PyMySQL", text)
         self.assertIn(
             "Entry points: {0}, python -m {1}".format(Cli.CONSOLE_NAME, Cli.APP_NAME),
             text,

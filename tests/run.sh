@@ -1,7 +1,6 @@
 #!/bin/sh
-# PyRbac test runner. RBAC cases need MariaDB and pyrbac_test.
+# RustRbac test runner. The ship suite is cargo test.
 set -eu
 ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-export PYTHONPATH="${ROOT}/src${PYTHONPATH:+:$PYTHONPATH}"
-python3 -m unittest discover -s tests -v
+cargo test -- --test-threads=8

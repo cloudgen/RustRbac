@@ -58,8 +58,8 @@ class TestReadme(unittest.TestCase):
 
     def test_tp_doc_01_structure_badge_and_absolute_images(self):
         version = _package_version()
-        self.assertEqual(version, "1.0.1")
-        self.assertIn("version-1.0.1", README)
+        self.assertEqual(version, "1.0.2")
+        self.assertIn("version-1.0.2", README)
         for heading in HEADINGS:
             self.assertIn("\n## {0}\n".format(heading), "\n" + README)
         for url in RELATED:

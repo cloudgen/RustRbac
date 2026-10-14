@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyRbac"
-version = "1.0.1"
+version = "1.0.2"
 description = "PyRbac is online RBAC and centralized configuration for the terminal and a local web page."
 readme = "README.md"
 requires-python = ">=3.9"

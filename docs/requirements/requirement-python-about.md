@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-about.md
-**Status**: Active (Version 1.0.0)
+**Status**: Retired (Version 1.0.0)
 **Area**: python
 **Key**: `requirement-python-about`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-about`.
 
 ## 1. Purpose
 
@@ -283,7 +285,8 @@ TP-ABOUT-01 asserts the identity line, every host-check label, the star-box titl
 | Date | Status | Note |
 |------|--------|------|
 | 2026-10-04 | Active 1.0.0 | About page: identity, host check, star box. Pyenv and conda reads stay here. No `--json`. Product version **1.0.5**. `./tests/run.sh` — 23 tests, OK. `TP-ABOUT-01` through `TP-ABOUT-14` and `TP-ABOUT-16` are have. There is no `TP-ABOUT-15` |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-about` |
 
-**Last Updated**: 2026-10-04
+**Last Updated**: 2026-10-11
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

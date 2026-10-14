@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-build-script.md
-**Status**: Active (Version 1.0.0)
+**Status**: Retired (Version 1.0.0)
 **Area**: python
 **Key**: `requirement-python-build-script`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-build-script`.
 
 ## 1. Purpose
 
@@ -180,6 +182,7 @@ On this product, `./build.sh upload` sends `dist/*` and does not perform those t
 | Date | Status | Notes |
 |------|--------|-------|
 | 2026-10-11 | Active 1.0.0 | Command set taken from the live `./build.sh` |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-build-script` |
 
 ---
 

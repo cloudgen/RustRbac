@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-cli-logging.md
-**Status**: Active (Version 1.0.2)
+**Status**: Retired (Version 1.0.2)
 **Area**: python
 **Key**: `requirement-python-cli-logging`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-logging`.
 
 ## 1. Purpose
 
@@ -291,9 +293,10 @@ On Termux, Git Bash, Windows cmd, or the same class, status files stay in the fo
 | 2026-10-04 | Active 1.0.0 | ChronicleLogger construct for PyRbac. Ship unit does not construct it yet. Floor target `ChronicleLogger>=1.3.1`. Live manifest remains `ChronicleLogger>=1.2.3` |
 | 2026-10-04 | Active 1.0.1 | Product version **1.0.4**. Manifest floor is `ChronicleLogger>=1.3.1`. `cli.py` reads `__version__` only |
 | 2026-10-04 | Active 1.0.2 | Rule 11c: environment checks read the one logger. Current version string is **1.0.5**. `TP-LOG-*` stay todo. `TP-ABOUT-16` is have. Primary owner is `requirement-python-about` |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-logging` |
 
 ---
 
-**Last Updated**: 2026-10-04
+**Last Updated**: 2026-10-11
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

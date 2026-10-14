@@ -1,10 +1,12 @@
 # =============================================================================
-# MySQL tables and the first seed for PyRbac.
-# requirement-database — FastAPI-shaped RBAC tables in this product's database.
+# Tables and the first seed for PyRbac.
+# requirement-database — the same columns on sqlite3 and on MySQL.
 # requirement-rbac — seed accounts, roles, menus, and permission strings.
 # requirement-python-oop — class Schema.
 # =============================================================================
 from __future__ import annotations
+
+import re
 
 from .password_hash import PasswordHash
 
@@ -317,9 +319,40 @@ class Schema:
         self.store = store
         self.passwords = passwords or PasswordHash(logger=logger)
 
+    def statements(self) -> tuple:
+        """General Purpose: MySQL DDL, or the sqlite3 equivalent of those columns."""
+        engine = "mysql"
+        settings = getattr(self.store, "settings", None)
+        if settings is not None:
+            engine = settings.engine()
+        if engine == "sqlite3":
+            return tuple(self.sqlite_statement(item) for item in self.STATEMENTS)
+        return self.STATEMENTS
+
+    @staticmethod
+    def sqlite_statement(sql: str) -> str:
+        """General Purpose: One CREATE TABLE that sqlite3 accepts. No foreign key."""
+        text = " ".join(sql.split())
+        text = text.replace(" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", "")
+        text = re.sub(
+            r"\b(BIGINT|INT)\s+NOT NULL\s+AUTO_INCREMENT",
+            "INTEGER PRIMARY KEY AUTOINCREMENT",
+            text,
+        )
+        text = re.sub(r"UNIQUE KEY \w+ \(([^)]+)\)", r"UNIQUE (\1)", text)
+        text = re.sub(r",\s*KEY \w+ \([^)]+\)", "", text)
+        for name in re.findall(r"(\w+)\s+INTEGER PRIMARY KEY AUTOINCREMENT", text):
+            text = re.sub(
+                r",\s*PRIMARY KEY \({0}\)".format(re.escape(name)),
+                "",
+                text,
+            )
+        text = re.sub(r",\s*\)", ")", text)
+        return text
+
     def ensure(self) -> str:
         """General Purpose: Create tables. Seed only when no user row exists."""
-        for statement in self.STATEMENTS:
+        for statement in self.statements():
             self.store.execute(statement)
         row = self.store.query_one("SELECT COUNT(*) AS n FROM sys_user")
         count = 0 if row is None else int(row["n"])

@@ -4,7 +4,9 @@
 
 | Version | Supported |
 |---------|-----------|
-| 1.0.1 (current) | Yes |
+| 1.1.0 (current) | Yes |
+| 1.0.2 | Yes |
+| 1.0.1 | Yes |
 | 1.0.0 | Yes |
 | Older releases | Best-effort; prefer upgrading to current |
 
@@ -29,4 +31,4 @@ This project follows **[CIAO](https://github.com/cloudgen/ciao)** / **CIAO-Lite*
 | **A** | **Anti-fragile** | A password file that is not mode 0600 is ignored. A non-loopback bind needs an explicit allow. |
 | **O** | **Over-protect** | The built-in administrator account and role stay in place. The program does not call sudo. |
 
-The web cookie is HttpOnly and SameSite=Lax. A form post carries a CSRF field. `--password` is visible in the process list. The sign-in question and the menu mask that field. Change the seeded passwords after the first sign-in. The text menu does not open until that sign-in succeeds.
+The web cookie is HttpOnly and SameSite=Lax. A form post carries a CSRF field. `--password` is visible in the process list. The sign-in question and the menu mask that field. Change the seeded passwords after the first sign-in. The text menu does not open until a sign-in succeeds.

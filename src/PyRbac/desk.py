@@ -49,6 +49,7 @@ class Desk:
                 self.catalog,
                 self.report,
                 logger=self.logger,
+                prepare=self.ensure_database,
             )
         return self._web
 
@@ -136,8 +137,7 @@ class Desk:
     def db_init(self) -> str:
         """General Purpose: Create tables and seed only when sys_user is empty."""
         state = self.ensure_database()
-        name = self.settings.database()["database"]
-        return "Database {0}: {1}.".format(name, state)
+        return "Database {0}: {1}.".format(self.settings.storage_label(), state)
 
     def serve_background(self) -> str:
         """General Purpose: Start the site on a background thread and report the URL."""
@@ -147,6 +147,8 @@ class Desk:
 
     def execute(self, verb, options) -> str:
         """General Purpose: Run one domain verb and return the text to show."""
+        if verb == "db-engine":
+            return self.settings.apply_choice(self._optional(options, "engine"))
         if verb == "db-init":
             return self.db_init()
         self.ensure_database()

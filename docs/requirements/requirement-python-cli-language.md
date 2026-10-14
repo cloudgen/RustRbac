@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-cli-language.md
-**Status**: Active (Version 1.0.1)
+**Status**: Retired (Version 1.0.1)
 **Area**: python
 **Key**: `requirement-python-cli-language`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-cli-language`.
 
 ## 1. Purpose
 
@@ -180,9 +182,10 @@ On Termux, Git Bash, Windows cmd, or the same class, the person runs `py-rbac` a
 |------|--------|------|
 | 2026-10-04 | Active 1.0.0 | Menu language for PyRbac. Front row 4. Thirteen codes. Leaf under this login’s home. `TP-LANG-01` has |
 | 2026-10-04 | Active 1.0.1 | English about explain is `version, FFmpeg, and this computer`. The about page stays English |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-cli-language` |
 
 ---
 
-**Last Updated**: 2026-10-04
+**Last Updated**: 2026-10-11
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

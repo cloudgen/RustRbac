@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-error-handling.md
-**Status**: Active (Version 1.2.0)
+**Status**: Retired (Version 1.2.0)
 **Area**: python
 **Key**: `requirement-python-error-handling`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-error-handling`.
 
 ## 1. Purpose
 
@@ -164,9 +166,10 @@ On Termux, Git Bash, Windows cmd, or the same class, failure sentences are for t
 | 2026-08-09 | Active 1.0.0 | Initial error-handling law for PyRbac |
 | 2026-08-09 | Active 1.1.0 | Fail-closed fallback and unique temp cleanup notes |
 | 2026-10-04 | Active 1.2.0 | ChronicleLogger is required for durable status. Console sentences stay. Missing library is a console line. Empty argv off a terminal is help, return 0 |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-error-handling` |
 
 ---
 
-**Last Updated**: 2026-10-04
+**Last Updated**: 2026-10-11
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

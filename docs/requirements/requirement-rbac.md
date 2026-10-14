@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-rbac.md
-**Status**: Active (Version 1.3.0)
+**Status**: Active (Version 1.3.2)
 **Area**: domain
 **Key**: `requirement-rbac`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -30,22 +30,22 @@ Bind names, cookie flags, and `CREATE TABLE` text stay on their peer files. This
 
 | Surface | What you open | What for |
 |---------|---------------|----------|
-| Text menu | `py-rbac` on a terminal | The same user, role, and setup actions |
-| Typed verb | `py-rbac user-list` | That list without opening the menu |
+| Text menu | `rust-rbac` on a terminal | The same user, role, and setup actions |
+| Typed verb | `rust-rbac user-list` | That list without opening the menu |
 | Web page | the URL printed by `serve` | That list, with the session cookie |
 
 ### 1.2 System map
 
 The text menu, the typed commands, and the local web pages call one service, `Desk`. `Desk` builds the settings, the terminal session file, the database store, the audit log, the password hash, `Access`, and `Catalog`. `WebApp` is created only when serve is chosen. `WebApp` calls the same `Access` and `Catalog` methods. It does not keep a second permission list.
 
-The terminal token is the mode-0600 file `session` under the application home (`~/.local/PyRbac` unless `PYRBAC_HOME` is set). The web token is the cookie `pyrbac_session`. Both tokens are rows in `sys_session`. A file that is not mode `0600` is treated as signed out. The path and the bind rules are `requirement-environment`. The cookie flags are `requirement-web-interface`.
+The terminal token is the mode-0600 file `session` under the application home (`~/.local/RustRbac` unless `RUSTRBAC_HOME` is set). The web token is the cookie `rust_rbac_session`. Both tokens are rows in `sys_session`. A file that is not mode `0600` is treated as signed out. The path and the bind rules are `requirement-environment`. The cookie flags are `requirement-web-interface`. The saved sign-in files are `requirement-local-login`. Those files are not the web cookie.
 
-`ChronicleLogger` writes the status file. It is not `sys_oper_log`, and it does not store a password. The construct is `requirement-python-cli-logging`.
+`StatusLog::open` in `src/main.rs` writes the status file. The logger is in-process. It is not ChronicleLogger. It is not `sys_oper_log`, and it does not store a password or argv. The construct is `requirement-rust-logging`. The ship language is Rust. The binary is `rust-rbac`. The product version is 1.1.0.
 
 ```mermaid
 flowchart TB
   subgraph surfaces [Surfaces]
-    CLI["CLI<br/>py-rbac verbs"]
+    CLI["CLI<br/>rust-rbac verbs"]
     TUI["Text menu<br/>Tui / MenuModel"]
     WEB["Web pages<br/>WebApp on 127.0.0.1:8765"]
   end
@@ -55,7 +55,7 @@ flowchart TB
   WEB --> DESK
 
   subgraph desk [Desk]
-    SET["Settings<br/>PYRBAC_DB_* and bind"]
+    SET["Settings<br/>RUSTRBAC_DB_* and bind"]
     SESS["SessionFile<br/>session file mode 0600"]
     ACC["Access<br/>users, roles, menus, depts, posts"]
     CAT["Catalog<br/>parameters, dictionaries, notices"]
@@ -75,16 +75,16 @@ flowchart TB
   CAT --> ACC
 
   SESS -->|"terminal token"| AUD
-  WEB -->|"cookie pyrbac_session"| AUD
+  WEB -->|"cookie rust_rbac_session"| AUD
 
   ACC --> STORE
   CAT --> STORE
   AUD --> STORE
   SCH --> STORE
 
-  STORE["Store<br/>PyMySQL, one connection per call"] --> DB[("MariaDB / MySQL<br/>database pyrbac")]
+  STORE["Store<br/>rusqlite and the mysql crate, ? placeholders"] --> DB[("sqlite3 file rust_rbac.sqlite3<br/>or MariaDB / MySQL database rust_rbac")]
 
-  LOG["ChronicleLogger<br/>status file, no passwords"] -.-> DESK
+  LOG["StatusLog::open<br/>in-process, no passwords, no argv"] -.-> DESK
 ```
 
 ### 1.3 Permission check and data scope
@@ -150,7 +150,7 @@ Common menus are system, user list, user query, setup, parameter list, notice li
 2. **Permission fail closed.** Any other account **MUST** be refused when the permission string is absent. The refusal **MUST** start with `Missing permission`.
 3. **Data scope.** User lists **MUST** apply scope 1 as all rows, scope 2 as the role's department list, scope 3 as the actor's department, and scope 4 as that department plus departments whose ancestors contain it. Any other scope **MUST** add no rows. No matching scope **MUST** show no users.
 4. **Names.** A new `user_name` **MUST** match `^[A-Za-z][A-Za-z0-9_]{2,29}$`.
-5. **Passwords.** Stored passwords **MUST** use `pbkdf2_sha256$iterations$salt$hash` with 260000 iterations. Comparison **MUST** use `hmac.compare_digest`. An unknown account **MUST** still run a dummy verify. The product **MUST NOT** log a password.
+5. **Passwords.** Stored passwords **MUST** use `pbkdf2_sha256$iterations$salt$hash` with 260000 iterations. There is no salt column. Comparison **MUST** walk every digest byte and **MUST NOT** stop at the first difference. An unknown account **MUST** still run a dummy verify. The product **MUST NOT** log a password or argv. An unknown account or a wrong password **MUST** be `Unknown account or wrong password.` A signed-out action **MUST** be `Not signed in.` `whoami` for `role_key` `admin` **MUST** contain `admin=yes`.
 6. **Protected rows.** User 1 **MUST NOT** be removed or disabled. Role 1 **MUST NOT** be granted a different scope or menu set through `role-grant`. The signed-in account **MUST NOT** remove itself.
 7. **Seed.** When `sys_user` is empty, the init used by `db-init` and by a menu, serve, or domain verb **MUST** create admin (department 101, role admin, password `admin123`), operator (department 102, role common, scope 3, password `operator123`), clerk (department 103, role common, password `clerk123`), and lead (department 101, role lead, scope 4, password `lead123`). Common menus include user list and query, parameter list, notice list, operation log, and login log. They **MUST NOT** include user add, parameter edit, or force logout. Lead menus are system, user list, and user query.
 8. **Audit.** A failed and a successful login **MUST** write `sys_logininfor`. A mutation **MUST** write `sys_oper_log`. The operation parameter **MUST NOT** be a password.
@@ -187,6 +187,8 @@ Common menus are system, user list, user query, setup, parameter list, notice li
 | 2026-10-11 | Active 1.1.0 | System map, records, seeded organization, one permission path |
 | 2026-10-11 | Active 1.2.0 | The same seed runs when a menu, serve, or domain verb finds an empty database |
 | 2026-10-11 | Active 1.3.0 | Scope numbers and password storage are stated for this product |
+| 2026-10-11 | Active 1.3.1 | Product RustRbac 1.1.0. Binary `rust-rbac`. Prefix `RUSTRBAC_`. Rust store. `StatusLog::open` |
+| 2026-10-11 | Active 1.3.2 | Saved terminal sign-in points at `requirement-local-login` and is not the web cookie |
 
 ---
 

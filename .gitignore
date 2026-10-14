@@ -31,6 +31,9 @@ ehthumbs.db
 !.vscode/settings.json
 *.code-workspace
 
+# --- Rust ---
+/target/
+
 # --- Temp / scratch / logs ---
 tmp/
 temp/

@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-oop.md
-**Status**: Active (Version 1.1.0)
+**Status**: Retired (Version 1.1.0)
 **Area**: python
 **Key**: `requirement-python-oop`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-modules`.
 
 ## 1. Purpose
 
@@ -64,6 +66,7 @@ Each module defines one class. An error type may sit beside the class that raise
 |------|--------|------|
 | 2026-10-04 | Active 1.0.0 | Menu and about classes |
 | 2026-10-11 | Active 1.1.0 | Desk, RBAC, and web classes |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-modules` |
 
 ---
 

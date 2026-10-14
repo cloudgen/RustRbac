@@ -1,58 +1,79 @@
 # Requirements index
 
-**Product:** PyRbac (Python CLI — text menu and local web pages for online RBAC)
-**Workspace state:** Specialized product law; **software-development** class; **pip/local package** install.
-**Product version:** **1.0.1** (`pyproject.toml`, `src/PyRbac/__init__.py`, root `README.md`)
-**Updated:** 2026-10-11
+**Product:** RustRbac (Rust CLI — text menu and local web pages for online RBAC)
+**Workspace state:** Specialized product law; **software-development** class; **Cargo** build. Binary `rust-rbac`.
+**Product version:** **1.1.0** (`Cargo.toml` is the version source)
+**Updated:** 2026-10-14
 
 | ID / key | Title | Area | Status | Path | Updated |
 |----------|-------|------|--------|------|---------|
-| requirement-class-software-dev | Software-development class law + residual stack (Python, setuptools) | class | Active | `requirement-class-software-dev.md` | 2026-10-04 |
-| requirement-domain-pyrbac | Domain surface: online RBAC and centralized configuration. Sign-in before the menu | domain | Active | `requirement-domain-pyrbac.md` | 2026-10-11 |
-| requirement-domain-videojoin | Retired welcome-line domain | domain | Retired | `requirement-domain-videojoin.md` | 2026-10-11 |
+| requirement-class-software-dev | Software-development class law + residual stack (Rust, Cargo) | class | Active | `requirement-class-software-dev.md` | 2026-10-14 |
+| requirement-domain-rust-rbac | Domain surface: online RBAC and centralized configuration. Sole Active domain | domain | Active | `requirement-domain-rust-rbac.md` | 2026-10-14 |
 | requirement-rbac | RBAC system map, permissions, data scope 1–4, seed on an empty database, protected rows | domain | Active | `requirement-rbac.md` | 2026-10-11 |
-| requirement-database | MariaDB table structure, pyrbac schema, seed-once, auto-init | domain | Active | `requirement-database.md` | 2026-10-11 |
-| requirement-environment | PYRBAC_* names, mode-0600 file, loopback bind | domain | Active | `requirement-environment.md` | 2026-10-11 |
-| requirement-web-interface | Local HTML site, cookie, CSRF, shared service | domain | Active | `requirement-web-interface.md` | 2026-10-11 |
-| requirement-python-about | About page: identity, host check, star box. No `--json` | python | Active | `requirement-python-about.md` | 2026-10-11 |
+| requirement-database | Table structure, `rust_rbac` schema, seed-once, sqlite3 and mysql | domain | Active | `requirement-database.md` | 2026-10-14 |
+| requirement-environment | `RUSTRBAC_*` names, mode-0600 file, loopback bind | domain | Active | `requirement-environment.md` | 2026-10-11 |
+| requirement-local-login | Saved terminal sign-in `local-login` and `local-login-key`. Not the web cookie | domain | Active | `requirement-local-login.md` | 2026-10-11 |
+| requirement-web-interface | Local HTML site, cookie `rust_rbac_session`, CSRF, shared service | domain | Active | `requirement-web-interface.md` | 2026-10-14 |
+| requirement-rust-about | About page: identity, host check, private cache leaf, star box. No `--json` | rust | Active | `requirement-rust-about.md` | 2026-10-14 |
+| requirement-rust-cli-interface | CLI entry `rust-rbac`, `PRODUCT_VERBS`, sign-in then menu on a terminal | rust | Active | `requirement-rust-cli-interface.md` | 2026-10-14 |
+| requirement-rust-logging | `StatusLog::open` in `src/main.rs`. No passwords or argv | rust | Active | `requirement-rust-logging.md` | 2026-10-11 |
+| requirement-rust-tui | Text menu rows 1 rbac, 2 server, 3 system-log, 6 self-management, 7 language, 9 Exit | rust | Active | `requirement-rust-tui.md` | 2026-10-14 |
+| requirement-rust-cli-language | Menu language: front row 7, codes 71–83, leaf `~/.local/RustRbac/language` | rust | Active | `requirement-rust-cli-language.md` | 2026-10-14 |
+| requirement-rust-modules | One concern per file under `src/*.rs` | rust | Active | `requirement-rust-modules.md` | 2026-10-11 |
+| requirement-rust-coding-style | Rust 2021. `Result` and `AppError`. No `unwrap` on operator paths | rust | Active | `requirement-rust-coding-style.md` | 2026-10-11 |
+| requirement-rust-packaging | `Cargo.toml` version 1.1.0, edition 2021, bin `rust-rbac`, MIT | rust | Active | `requirement-rust-packaging.md` | 2026-10-11 |
+| requirement-rust-build-script | Maintainer `./build.sh` Cargo commands, including test-install | rust | Active | `requirement-rust-build-script.md` | 2026-10-11 |
+| requirement-rust-project-structure | `src/lib.rs`, `src/main.rs`, `tests/*.rs`, requirements, reviews, screenshots | rust | Active | `requirement-rust-project-structure.md` | 2026-10-11 |
+| requirement-rust-readme | Root user document: sections, absolute screenshot URLs | rust | Active | `requirement-rust-readme.md` | 2026-10-14 |
+| requirement-rust-error-handling | Fail-closed errors. stderr `ERROR:` and `   Next:` | rust | Active | `requirement-rust-error-handling.md` | 2026-10-11 |
+| requirement-runtime-prerequisites | `rustc`, `cargo`, sqlite, mysql client for mysql. No sudo | runtime | Active | `requirement-runtime-prerequisites.md` | 2026-10-11 |
+| requirement-domain-pyrbac | Retired. Replaced by `requirement-domain-rust-rbac` | domain | Retired | `requirement-domain-pyrbac.md` | 2026-10-11 |
+| requirement-domain-videojoin | Retired welcome-line domain | domain | Retired | `requirement-domain-videojoin.md` | 2026-10-11 |
 | requirement-video-ffmpeg-pipeline | Retired. No encoder, no concat, no media publish | video | Retired | `requirement-video-ffmpeg-pipeline.md` | 2026-10-11 |
-| requirement-python-cli-interface | CLI entry, typed verbs, sign-in then menu on a terminal | python | Active | `requirement-python-cli-interface.md` | 2026-10-11 |
-| requirement-python-cli-logging | ChronicleLogger construct in `def main`; no passwords in the log | python | Active | `requirement-python-cli-logging.md` | 2026-10-11 |
-| requirement-python-tui | Text menu rows 2–9, sign-in first, path word, display columns | python | Active | `requirement-python-tui.md` | 2026-10-11 |
-| requirement-python-cli-language | Menu language: front row 4, codes 41–53, leaf `~/.local/PyRbac/language` | python | Active | `requirement-python-cli-language.md` | 2026-10-11 |
-| requirement-python-oop | Class map, including Desk, Access, and WebApp | python | Active | `requirement-python-oop.md` | 2026-10-11 |
-| requirement-python-coding-style | Python style; one class per module; end state is the class map | python | Active | `requirement-python-coding-style.md` | 2026-10-04 |
-| requirement-python-packaging | `pyproject.toml` / version / console script `py-rbac` | python | Active | `requirement-python-packaging.md` | 2026-10-11 |
-| requirement-python-build-script | Maintainer `./build.sh` commands, including test-install | python | Active | `requirement-python-build-script.md` | 2026-10-11 |
-| requirement-python-project-structure | Repository and `src/PyRbac` layout | python | Active | `requirement-python-project-structure.md` | 2026-10-11 |
-| requirement-python-readme | Root user document: sections, badges, absolute screenshot URLs | python | Active | `requirement-python-readme.md` | 2026-10-11 |
-| requirement-python-error-handling | Fail-closed errors; console sentences stay | python | Active | `requirement-python-error-handling.md` | 2026-10-04 |
-| requirement-runtime-prerequisites | MariaDB or MySQL, PyMySQL, ChronicleLogger; no root auto-install | runtime | Active | `requirement-runtime-prerequisites.md` | 2026-10-11 |
+| requirement-python-about | Retired. Replaced by `requirement-rust-about` | python | Retired | `requirement-python-about.md` | 2026-10-11 |
+| requirement-python-build-script | Retired. Replaced by `requirement-rust-build-script` | python | Retired | `requirement-python-build-script.md` | 2026-10-11 |
+| requirement-python-cli-interface | Retired. Replaced by `requirement-rust-cli-interface` | python | Retired | `requirement-python-cli-interface.md` | 2026-10-11 |
+| requirement-python-cli-language | Retired. Replaced by `requirement-rust-cli-language` | python | Retired | `requirement-python-cli-language.md` | 2026-10-11 |
+| requirement-python-cli-logging | Retired. Replaced by `requirement-rust-logging` | python | Retired | `requirement-python-cli-logging.md` | 2026-10-11 |
+| requirement-python-coding-style | Retired. Replaced by `requirement-rust-coding-style` | python | Retired | `requirement-python-coding-style.md` | 2026-10-11 |
+| requirement-python-error-handling | Retired. Replaced by `requirement-rust-error-handling` | python | Retired | `requirement-python-error-handling.md` | 2026-10-11 |
+| requirement-python-oop | Retired. Replaced by `requirement-rust-modules` | python | Retired | `requirement-python-oop.md` | 2026-10-11 |
+| requirement-python-packaging | Retired. Replaced by `requirement-rust-packaging` | python | Retired | `requirement-python-packaging.md` | 2026-10-11 |
+| requirement-python-project-structure | Retired. Replaced by `requirement-rust-project-structure` | python | Retired | `requirement-python-project-structure.md` | 2026-10-11 |
+| requirement-python-readme | Retired. Replaced by `requirement-rust-readme` | python | Retired | `requirement-python-readme.md` | 2026-10-11 |
+| requirement-python-tui | Retired. Replaced by `requirement-rust-tui` | python | Retired | `requirement-python-tui.md` | 2026-10-11 |
+
+Version column for the files that carry one: database **2.0.1**. Class **1.1.5**. RBAC **1.3.2**. Environment **1.0.2**. Web **1.0.2**. Local login **1.0.0**. Runtime **1.2.1**. Domain `requirement-domain-rust-rbac` **1.0.1**. Rust TUI **1.0.2**. Rust about, CLI, logging, modules, and readme **1.0.1**. The other Rust requirements stay **1.0.0**.
 
 ## Intentionally absent (by design)
 
-| Surface | Status on PyRbac |
+| Surface | Status on RustRbac |
 |---------|----------------------|
 | Shell online install / `curl\|sh` | **Absent** |
 | Type 1 sudoers / root elevation inside the program | **Absent** |
-| Code generation, AI, plugins, jobs, Redis, Vue bundle | **Absent** for 1.0.1 |
-| Second Active `requirement-domain-*` | **Forbidden** while `requirement-domain-pyrbac` is Active |
+| Code generation, AI, plugins, jobs, Redis, Vue bundle | **Absent** for 1.1.0 |
+| Second Active `requirement-domain-*` | **Forbidden**. The only Active domain is `requirement-domain-rust-rbac` |
 | `hello`, `join`, `list-videos`, FFmpeg | **Absent** |
-| `requirement-python-json-output` | **Absent**. No `--json` |
+| `--json` | **Absent** |
+| ChronicleLogger, PyMySQL, a crates.io publish | **Absent** |
+| `sudo` as a product requirement | **Absent** |
 
-**Install mode:** **pip / local package** (`py-rbac` console script).
+**Install mode:** Cargo. Ship binary `rust-rbac`. Do not claim a crates.io publish. Self-management says cargo, not pip.
 
-**Logger:** required (`ChronicleLogger>=1.3.1`). `def main` in `src/PyRbac/cli.py` writes `ChronicleLogger(...)`.
+**Logger:** `StatusLog::open` constructed in `src/main.rs`. In-process. Not ChronicleLogger.
 
-**Database:** MariaDB or MySQL through `PyMySQL>=1.1.0`. Product schema `pyrbac`. Tests use `pyrbac_test`.
+**Database:** Default engine sqlite3. File `rust_rbac.sqlite3`, mode `0600`, home directory `~/.local/RustRbac`, mode `0700`. Choice 2 is mysql, database `rust_rbac`, tests `rust_rbac_test`. Users `rust_rbac`@localhost and `rust_rbac`@127.0.0.1, granted only on `rust_rbac.*` and `rust_rbac_test.*`. No password default.
+
+**Denied databases:** the product must not open or write `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`.
 
 **Rules for agents:**
 
-1. Treat rows above as the live product-law inventory for PyRbac.
+1. Treat Active rows above as the live product-law inventory for RustRbac.
 2. Do not invent additional `requirement-*.md` paths without a registry row in the same change.
 3. Product source comments cite only these live requirement files.
 4. Keep Status and Path in sync with each file’s header.
-5. Exactly one Active `requirement-domain-*` (`requirement-domain-pyrbac`).
-6. Do not write `ruoyi_db` or `ry`.
+5. Exactly one Active `requirement-domain-*` (`requirement-domain-rust-rbac`).
+6. Do not open or write `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`.
+7. Python sources under `src/PyRbac` remain on disk. They are not the ship unit. `requirement-python-*` stays Retired.
 
 When adding a requirement: append a row, create the file under `docs/requirements/`, keep Status in sync with the file header.

@@ -11,13 +11,15 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
+from .settings import SettingsError
+
 
 class WebApp:
     """Small HTTP site. Every mutating page calls Access or Catalog."""
 
     COOKIE = "pyrbac_session"
 
-    def __init__(self, settings, access, catalog, report, logger=None):
+    def __init__(self, settings, access, catalog, report, logger=None, prepare=None):
         self.logger = logger
         if logger is not None:
             logger.log_message("instantiated", component="WebApp")
@@ -25,6 +27,7 @@ class WebApp:
         self.access = access
         self.catalog = catalog
         self.report = report
+        self.prepare = prepare
         self.httpd = None
         self.thread = None
 
@@ -177,6 +180,9 @@ class WebApp:
         if path == "/online":
             self.catalog.access.require(user, "monitor:online:list")
             return self.online_page(user, error)
+        if path == "/database":
+            self.access.require(user, "system:config:edit")
+            return self.database_page(user, error)
         return None
 
     def _route_post(self, handler, path, user, form):
@@ -287,9 +293,52 @@ class WebApp:
             self.catalog.online_logout(user, self._first(form, "token"))
             self._redirect(handler, "/online")
             return
+        if path == "/database":
+            self.access.require(user, "system:config:edit")
+            before = self.settings.engine()
+            self._apply_posted_engine(handler, form, allow_remote=True)
+            if self.settings.engine() != before:
+                self._redirect(handler, "/login", clear=True)
+                return
+            self._redirect(handler, "/database")
+            return
         self._send(handler, 404, self.page(user, "Not found", "<p>That action is not on this site.</p>"))
 
+    def _loopback(self, handler) -> bool:
+        host = ""
+        if getattr(handler, "client_address", None):
+            host = handler.client_address[0]
+        return host in ("127.0.0.1", "::1", "localhost")
+
+    def _apply_posted_engine(self, handler, form, allow_remote=False):
+        """Store a posted sqlite3 or mysql choice. A remote login cannot switch engines."""
+        posted = self._first(form, "engine").strip().lower()
+        if posted == "":
+            return
+        if posted in ("1", "sqlite3"):
+            wanted = "sqlite3"
+        elif posted in ("2", "mysql"):
+            wanted = "mysql"
+        else:
+            raise SettingsError(
+                "The database engine must be sqlite3 or mysql.",
+                "choose sqlite3 or mysql",
+                logger=self.logger,
+            )
+        if wanted == self.settings.engine():
+            return
+        if not allow_remote and not self._loopback(handler):
+            raise SettingsError(
+                "The database engine can be changed from this computer.",
+                "open the site on 127.0.0.1, or run py-rbac db-engine",
+                logger=self.logger,
+            )
+        self.settings.apply_choice(wanted)
+
     def _post_login(self, handler, form):
+        self._apply_posted_engine(handler, form)
+        if self.prepare is not None:
+            self.prepare()
         user = self.access.login(
             self._first(form, "user_name"),
             self._first(form, "password"),
@@ -403,6 +452,7 @@ class WebApp:
             ("/oper-log", "Operation log", "monitor:operlog:list"),
             ("/login-log", "Login log", "monitor:logininfor:list"),
             ("/online", "Online", "monitor:online:list"),
+            ("/database", "Database", "system:config:edit"),
         )
         for href, label, perm in pairs:
             if self.access.allows(user["user_id"], perm):
@@ -438,17 +488,53 @@ class WebApp:
             return ""
         return "<p class=\"error\">{0}</p>".format(self._e(error))
 
+    def engine_fields(self) -> str:
+        """The two engine choices. sqlite3 names the file, including the default file."""
+        current = self.settings.engine()
+        path = self.settings.sqlite_path()
+        mark = " (default file)" if self.settings.get("PYRBAC_SQLITE_FILE") == "" else ""
+        name = self.settings.get("PYRBAC_DB_NAME")
+
+        def radio(value, label):
+            checked = " checked" if current == value else ""
+            return (
+                '<label><input type="radio" name="engine" value="{value}"{checked}> {label}</label>'
+            ).format(value=value, checked=checked, label=self._e(label))
+
+        return (
+            "<fieldset><legend>Database</legend>"
+            "<p>{sqlite}</p><p>{mysql}</p></fieldset>"
+        ).format(
+            sqlite=radio("sqlite3", "sqlite3 {0}{1}".format(path, mark)),
+            mysql=radio("mysql", "mysql {0}".format(name)),
+        )
+
     def login_page(self, error) -> str:
         body = (
-            "{error}<form method=\"post\" action=\"/login\">"
+            "{error}<form method=\"post\" action=\"/login\">{engine}"
             "<p><label>Account <input name=\"user_name\" autocomplete=\"username\"></label></p>"
             "<p><label>Password <input name=\"password\" type=\"password\" autocomplete=\"current-password\"></label></p>"
             "<p><button type=\"submit\">Sign in</button></p></form>"
             "<p>Seeded accounts and initial passwords are in the product README. "
             "Change them after the first sign-in. This site listens on this computer only "
-            "unless remote bind was explicitly allowed.</p>"
-        ).format(error=self._error_line(error))
+            "unless remote bind was explicitly allowed. "
+            "The default database is the sqlite3 file. mysql needs PYRBAC_DB_PASSWORD.</p>"
+        ).format(error=self._error_line(error), engine=self.engine_fields())
         return self.page(None, "Sign in", body)
+
+    def database_page(self, user, error) -> str:
+        body = (
+            "{error}<p>{sentence} The next sign-in uses the saved engine. "
+            "Changing it signs this browser out, because the session row stays in the previous database.</p>"
+            "<form method=\"post\" action=\"/database\">{engine}{csrf}"
+            "<p><button type=\"submit\">Save</button></p></form>"
+        ).format(
+            error=self._error_line(error),
+            sentence=self._e(self.settings.engine_sentence()),
+            engine=self.engine_fields(),
+            csrf=self._hidden(user),
+        )
+        return self.page(user, "Database", body)
 
     def home_page(self, user, error) -> str:
         body = "{error}<p>Signed in as <strong>{name}</strong>.</p><pre>{who}</pre>".format(

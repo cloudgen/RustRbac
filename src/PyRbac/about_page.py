@@ -190,7 +190,7 @@ class AboutPage:
         lines = [
             "{} {}".format(self.app_name, self.version),
             "Domain: Online RBAC and centralized configuration",
-            "Runtime tools: MariaDB or MySQL, PyMySQL",
+            "Runtime tools: sqlite3 (default file) or MariaDB or MySQL, PyMySQL",
             "Entry points: {}, python -m {}".format(self.console_name, self.app_name),
             "",
         ]

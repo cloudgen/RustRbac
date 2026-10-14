@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-coding-style.md
-**Status**: Active (Version 1.1.1)
+**Status**: Retired (Version 1.1.1)
 **Area**: python
 **Key**: `requirement-python-coding-style`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-coding-style`.
 
 ## 1. Purpose
 
@@ -170,9 +172,10 @@ On Termux, Git Bash, Windows cmd, or the same class, temps and the published fil
 | 2026-08-09 | Active 1.0.0 | Coding style, `shutil.move`, and multi-mount file I/O for PyRbac |
 | 2026-10-04 | Active 1.1.0 | Procedural `cli.py` is the running tree, not the allowed end state. The end state is `requirement-python-oop`. StateLogic stays unordered. Rules 7–15 are unchanged |
 | 2026-10-04 | Active 1.1.1 | Current version string is **1.0.5** |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-coding-style` |
 
 ---
 
-**Last Updated**: 2026-10-04
+**Last Updated**: 2026-10-11
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

@@ -1,5 +1,7 @@
 # PyRbac review — 2026-10-11
 
+> Historical. The product is now RustRbac. The current review is `reviews/2026-10-11-rust-rbac-review.md`. This file keeps the PyRbac result.
+
 **Product:** PyRbac 1.0.1
 **Scope:** Requirements, RBAC behavior, database isolation, web pages, text menu, and ChronicleLogger.
 **Result:** Pass with the limits below.

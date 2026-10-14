@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-python-readme.md
-**Status**: Active (Version 1.2.0)
+**Status**: Retired (Version 1.2.0)
 **Area**: python
 **Key**: `requirement-python-readme`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-rust-readme`.
 
 ## 1. Purpose
 
@@ -47,6 +49,7 @@ Features, Advantages, Quick Installation, Usage, Screenshots, Examples, Platform
 | 2026-10-04 | Active 1.0.0 | Earlier picture catalog |
 | 2026-10-11 | Active 1.1.0 | PyRbac captures and seed disclosure |
 | 2026-10-11 | Active 1.2.0 | Badge 1.0.1. Sign-in before the menu. No session row |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-rust-readme` |
 
 ---
 

@@ -6,7 +6,9 @@
 
 ## 1. Purpose
 
-This requirement is retired. PyRbac does not call FFmpeg, does not concatenate media, and does not publish a media file.
+This requirement is retired. RustRbac does not call FFmpeg, does not concatenate media, and does not publish a media file.
+
+The current product is RustRbac. This file stays retired.
 
 The welcome line is `requirement-domain-videojoin`. Do not treat the historical concat procedure as law.
 
@@ -45,9 +47,10 @@ The welcome line is `requirement-domain-videojoin`. Do not treat the historical 
 | 2026-08-09 | Active 1.0.0 | Stream-copy concat, then re-encode, then `shutil.move` |
 | 2026-10-04 | Active 1.2.0 | Fail-closed re-encode stayed |
 | 2026-10-05 | Retired 1.3.0 | Encoder support removed with the join |
+| 2026-10-11 | Retired 1.3.0 | Current product is RustRbac. This file stays retired |
 
 ---
 
-**Last Updated**: 2026-10-05
+**Last Updated**: 2026-10-11
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`.

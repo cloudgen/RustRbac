@@ -1,7 +1,28 @@
 # CHANGELOG
 
-All notable changes to **PyRbac** are documented here.
-Version SSOT: `pyproject.toml` + `src/PyRbac/__init__.__version__`.
+All notable changes to **RustRbac** are documented here.
+Version SSOT: `Cargo.toml`.
+
+## [1.1.0] - 2026-10-11
+
+### Changed
+
+- The ship unit is the Rust crate `rust_rbac`. The console script is `rust-rbac`.
+- The home directory is `~/.local/RustRbac`. The sqlite file is `rust_rbac.sqlite3`. The mysql database is `rust_rbac`. Tests use `rust_rbac_test`.
+- Environment names use the `RUSTRBAC_` prefix. The web cookie is `rust_rbac_session`.
+- The product refuses to open `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, and `ry`.
+- Status logging is `StatusLog::open` in `src/main.rs`. Self-management copy names cargo.
+- The earlier Python package remains on disk and is not the ship unit.
+- The main menu and its questions use the full-screen board: path line, local clock, rounded input box, and the name and version on the status line. Typed verbs stay on the command line.
+- 2026-10-14: The front board is 1 rbac, 2 server, 3 system-log, 6 self-management, 7 language, and 9 Exit. Server holds setup 21, audit 22, and serve 23. Rbac children are 11–19 and 110–113. Setup children are 211–218. Audit children are 221–224. Self-management children are 62–67. Language codes are 71–83. Self-management still says cargo.
+- 2026-10-14: The README pictures are captures of this menu, including the server board. The public repository is https://github.com/cloudgen/RustRbac.
+
+## [1.0.2] - 2026-10-11
+
+### Added
+
+- sqlite3 and mysql. The default is the sqlite3 file `~/.local/PyRbac/pyrbac.sqlite3`.
+- The terminal, the text menu, and the web sign-in page each offer choice 1 sqlite3 and choice 2 mysql. `py-rbac db-engine` stores the choice and does not open the database. Setup row 78 and the Database page offer the same choice.
 
 ## [1.0.1] - 2026-10-11
 

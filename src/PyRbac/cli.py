@@ -47,6 +47,7 @@ class Cli:
         "whoami",
         "serve",
         "db-init",
+        "db-engine",
         "user-list",
         "user-add",
         "user-edit",
@@ -208,8 +209,10 @@ class Cli:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=(
                 "{0} — online RBAC and centralized configuration.\n"
-                "With no arguments on a terminal, asks for an account and a password,\n"
-                "then opens the text menu. It creates missing tables first.\n"
+                "With no arguments on a terminal, asks for the database engine,\n"
+                "then an account and a password, then opens the text menu.\n"
+                "The default engine is the sqlite3 file. It creates missing tables first.\n"
+                "db-engine chooses sqlite3 or mysql and does not open the database.\n"
                 "With no arguments and no terminal, prints this help and stops.\n"
                 "Product verbs: {1}.\n"
                 "The text menu has no session row. Row 7 serve starts the site.\n"
@@ -273,6 +276,11 @@ class Cli:
         parser.add_argument("--notice-type", default="", help="1 notice, 2 announcement.")
         parser.add_argument("--content", default="")
         parser.add_argument("--token", default="", help="Online session token from online-list.")
+        parser.add_argument(
+            "--engine",
+            default="",
+            help="For db-engine: sqlite3 (the default file) or mysql.",
+        )
         return parser
 
     def _page(self, text):
@@ -312,6 +320,8 @@ class Cli:
             return self.self_manage.emit(verb)
         if verb == "serve":
             return self._verb_serve()
+        if verb == "db-engine":
+            return self._verb_engine(args)
         if verb in Cli.DOMAIN_VERBS:
             return self._verb_domain(verb, args)
         if verb is not None:
@@ -350,6 +360,33 @@ class Cli:
             return self.report_error(str(exc), exc.nxt)
         if text:
             print(text)
+        return 0
+
+    def _verb_engine(self, args):
+        """Choose sqlite3 or mysql. This verb does not open the database."""
+        settings = self.desk.settings
+        if args.engine:
+            try:
+                print(settings.apply_choice(args.engine))
+            except SettingsError as exc:
+                return self.report_error(str(exc), exc.nxt)
+            return 0
+        try:
+            lines = settings.choice_lines()
+        except SettingsError as exc:
+            return self.report_error(str(exc), exc.nxt)
+        for line in lines:
+            print(line)
+        if not self.stdout_is_tty():
+            return 0
+        try:
+            picked = input("Choice [keep]: ")
+        except EOFError:
+            return 0
+        try:
+            print(settings.apply_choice(picked))
+        except SettingsError as exc:
+            return self.report_error(str(exc), exc.nxt)
         return 0
 
     def _verb_serve(self):

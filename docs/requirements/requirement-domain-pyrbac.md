@@ -1,8 +1,10 @@
 **file**: docs/requirements/requirement-domain-pyrbac.md
-**Status**: Active (Version 1.2.0)
+**Status**: Retired (Version 1.2.0)
 **Area**: domain
 **Key**: `requirement-domain-pyrbac`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
+
+> **Retired.** The product is RustRbac. The Active replacement is `requirement-domain-rust-rbac`.
 
 ## 1. Purpose
 
@@ -65,6 +67,7 @@ This file is the sole Active `requirement-domain-*`.
 | 2026-10-11 | Active 1.0.0 | PyRbac domain. Welcome-line domain retired |
 | 2026-10-11 | Active 1.1.0 | Sign-in before the menu. No session row |
 | 2026-10-11 | Active 1.2.0 | This product does not depend on another admin framework |
+| 2026-10-11 | Retired | Product is RustRbac. Active replacement is `requirement-domain-rust-rbac` |
 
 ---
 
