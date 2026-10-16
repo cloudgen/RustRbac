@@ -5,7 +5,7 @@ Authoritative specialized product law for **RustRbac** lives here.
 | Fact | Value |
 |------|-------|
 | Product | RustRbac |
-| Version SSOT | **`1.1.0`** (`Cargo.toml`) |
+| Version SSOT | **`1.1.1`** (`Cargo.toml`) |
 | Console script | `rust-rbac` |
 | Crate / sqlite stem | `rust_rbac` |
 | sqlite file | `rust_rbac.sqlite3`, mode `0600`, home directory `~/.local/RustRbac`, mode `0700` |
@@ -19,6 +19,6 @@ Authoritative specialized product law for **RustRbac** lives here.
 | Saved sign-in | `requirement-local-login` — `local-login` and `local-login-key`. Not the web cookie |
 | Web | `127.0.0.1:8765` unless `RUSTRBAC_ALLOW_REMOTE=yes` (environment only) |
 | Maintainer tool | `requirement-rust-build-script` — `./build.sh` |
-| Python tree | `src/PyRbac` remains on disk and is not the ship unit. `requirement-python-*` is Retired |
+| Python package | Absent. `pyproject.toml`, `src/PyRbac`, the Python tests, and `requirement-python-*` were removed. Database names `pyrbac` and `pyrbac_test` stay refused |
 
 The registry is [index.md](index.md).

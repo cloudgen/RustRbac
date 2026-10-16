@@ -1,6 +1,7 @@
 //! Tables and the one-time seed.
 //! requirement-database — the same columns on sqlite3 and on MySQL.
 //! requirement-rbac — seed accounts, roles, menus, and permission strings.
+//! requirement-rbac-menu — menu 1022 is edit and menu 1023 is remove.
 
 use std::sync::Arc;
 
@@ -299,6 +300,8 @@ const MENUS: &[(i64, &str, i64, i64, &str, &str, &str)] = &[
     (1012, "Role edit", 101, 2, "", "F", "system:role:edit"),
     (102, "Menu", 1, 3, "menu", "C", "system:menu:list"),
     (1021, "Menu add", 102, 1, "", "F", "system:menu:add"),
+    (1022, "Menu edit", 102, 2, "", "F", "system:menu:edit"),
+    (1023, "Menu remove", 102, 3, "", "F", "system:menu:remove"),
     (103, "Department", 1, 4, "dept", "C", "system:dept:list"),
     (1031, "Department add", 103, 1, "", "F", "system:dept:add"),
     (104, "Post", 1, 5, "post", "C", "system:post:list"),

@@ -1,5 +1,6 @@
 //! Text menu rows, path line, language leaf, and the full-screen board.
 //! requirement-rust-tui — path line, clock, rounded input box, status line.
+//! requirement-rbac-menu — rows 18 and 19. Edit, remove, and save sort are not rows.
 //! requirement-rust-cli-language — row 7 and the language leaf.
 
 use std::collections::VecDeque;
@@ -500,6 +501,7 @@ impl MenuPainter {
                     "start the web interface on this computer",
                     "serve",
                 ),
+                MenuRow::new(24, "theme", "vue3 or adminlte", "theme"),
                 MenuRow::new(0, "Back", "return to the main menu", "back"),
             ],
             "setup" => vec![

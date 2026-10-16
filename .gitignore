@@ -1,6 +1,6 @@
 # =============================================================================
-# .gitignore — PyRbac (Python package CLI)
-# Detected: Python (pyproject.toml, src/**/*.py)
+# .gitignore — RustRbac (Rust crate, console script rust-rbac)
+# Detected: Rust (Cargo.toml, src/**/*.rs). No Python package. Cache names below stay ignored.
 # Docs: track docs/requirements/** ; ignore harness/skills/terms/policies/templates
 # Artifacts: compiled, caches, temp, secrets, local H2 backups
 # =============================================================================
@@ -88,6 +88,7 @@ pip-wheel-metadata/
 # --- Local H2 / agent backups (never commit) ---
 .h2-backup-*/
 .h1-backup-*/
+.t2p-docs-backup-*/
 
 # --- Agent harness (root) — local only ---
 AGENTS.md

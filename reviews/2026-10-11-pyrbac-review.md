@@ -1,6 +1,6 @@
 # PyRbac review — 2026-10-11
 
-> Historical. The product is now RustRbac. The current review is `reviews/2026-10-11-rust-rbac-review.md`. This file keeps the PyRbac result.
+> Historical. The product is now RustRbac. The current review is `reviews/2026-10-11-rust-rbac-review.md`. This file keeps the PyRbac result. The Python sources and requirements named below were removed from the tree on 2026-10-14.
 
 **Product:** PyRbac 1.0.1
 **Scope:** Requirements, RBAC behavior, database isolation, web pages, text menu, and ChronicleLogger.

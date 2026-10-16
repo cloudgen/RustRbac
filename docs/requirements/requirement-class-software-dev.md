@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-class-software-dev.md
-**Status**: Active (Version 1.1.6 – RustRbac software-development class law + residual stack)
+**Status**: Active (Version 1.1.8 – RustRbac software-development class law + residual stack)
 **Area**: class
 **Key**: `requirement-class-software-dev`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -29,7 +29,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 | Surface | What you open | What for |
 |---------|---------------|----------|
 | This file | Residual table | Which requirement owns the topic |
-| `Cargo.toml` | Package tool facts | The concrete manifest. Packaging owns the tables. Version **1.1.0** |
+| `Cargo.toml` | Package tool facts | The concrete manifest. Packaging owns the tables. Version **1.1.1** |
 | `rust-rbac` | The program | You run it as the normal user |
 
 | You do… | What it means | What you type |
@@ -97,7 +97,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 | **Project class** | software-development |
 | **Class requirement basename** | `requirement-class-software-dev.md` |
 | **Primary language(s)** | Rust |
-| **Language role** | Rust is the ship language. Python sources under `src/PyRbac` remain on disk and are not the ship unit |
+| **Language role** | Rust is the ship language. This tree has no Python package |
 | **Execution model** | compiled binary |
 | **Toolchain** | `rustc` and Cargo. Edition 2021 |
 | **Toolchain version policy** | edition 2021 as declared in `Cargo.toml`. Do not advertise an untested rustc minor |
@@ -110,7 +110,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 | **Architectures supported** | architectures where this Rust binary is built |
 | **Git surface** | used — remote `https://github.com/cloudgen/RustRbac` |
 | **Ship surface** | Cargo binary `rust-rbac`. Not a crates.io publish |
-| **Product version SSOT** | `Cargo.toml` `version` (current: **1.1.0**) |
+| **Product version SSOT** | `Cargo.toml` `version` (current: **1.1.1**) |
 | **Install mode** | Cargo on this checkout. Not a shell online-install product. Self-management says cargo, not pip |
 | **Type 1 elevation** | intentionally absent. No root or sudo product surface |
 | **Actor / role / subject / approver** | **Considered — no dest approver.** The human operator of `rust-rbac` is the only actor. No dest approval machine. **None** is valid. Do not add an actor requirement file |
@@ -123,7 +123,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 |-------|-------|--------|
 | Project class membership | **this file** | Fixed |
 | Primary language + toolchain policy | **this file** | Rust, `rustc`, and Cargo. Not Python as the ship language |
-| Package/build tool + version | **this file** + `requirement-rust-packaging` | `Cargo.toml` version **1.1.0**. No crates.io publish claim |
+| Package/build tool + version | **this file** + `requirement-rust-packaging` | `Cargo.toml` version **1.1.1**. No crates.io publish claim |
 | Maintainer `./build.sh` commands | `requirement-rust-build-script` | Cargo verbs. The CLI does not require this script to run |
 | Project layout | `requirement-rust-project-structure` | `src/lib.rs`, `src/main.rs`, `tests/*.rs` |
 | Modules | `requirement-rust-modules` | One concern per `src/*.rs` file |
@@ -141,7 +141,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 | Shell online install / shell self-update / Type O | **intentionally absent** | Not a shell channel |
 | Cargo lifecycle (`version-check`, `self-update`, `self-install`, `self-uninstall`) | `requirement-rust-cli-interface` and `requirement-rust-tui` | cargo, not pip. Not a shell channel. Do not `cargo publish` |
 | Type 1 sudoers / root elevation | **intentionally absent** | No elevation law |
-| Python sources under `src/PyRbac` | **not the ship unit** | They remain on disk. Retired `requirement-python-*` files keep the historical body |
+| Python package | **absent** | `pyproject.toml`, `src/PyRbac`, the Python tests, and `requirement-python-*` are removed. Database names `pyrbac` and `pyrbac_test` stay refused |
 | Actor / role / subject / approver | **this file (residual)** | Considered — no dest approver |
 | Dest fence conditions | **this file (residual)** | Considered — no dest fence conditions |
 
@@ -184,7 +184,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 |----|-----------|
 | AC-1 | The sole Active class file is `requirement-class-software-dev.md` |
 | AC-2 | Primary ship language is Rust. The toolchain is `rustc` and Cargo |
-| AC-3 | The package tool is Cargo. `Cargo.toml` is the version source, **1.1.0** |
+| AC-3 | The package tool is Cargo. `Cargo.toml` is the version source, **1.1.1** |
 | AC-4 | The residual table points at the Rust CLI, TUI, logging, modules, and domain peers without copying their bodies |
 | AC-5 | Shell Type O and Type 1 elevation are absent. Cargo lifecycle is owned by the CLI and the TUI. No sudo |
 | AC-6 | Registered in `docs/requirements/index.md` with Area `class` |
@@ -194,7 +194,7 @@ This file is class law plus the residual SSOT. It is not a second copy of the do
 
 | Key | Relationship |
 |-----|----------------|
-| `requirement-rust-packaging` | Manifest, binary `rust-rbac`, version 1.1.0 |
+| `requirement-rust-packaging` | Manifest, binary `rust-rbac`, version 1.1.1 |
 | `requirement-rust-build-script` | Maintainer `./build.sh` commands |
 | `requirement-rust-project-structure` | Layout |
 | `requirement-rust-modules` | One concern per file |
@@ -234,9 +234,11 @@ On Termux, Git Bash, Windows cmd, or the same class, RustRbac runs as the normal
 | 2026-10-11 | Active 1.1.4 | Ship language is Rust. Cargo. Binary `rust-rbac`. Version 1.1.0. No sudo |
 | 2026-10-11 | Active 1.1.5 | Residual row for the saved terminal sign-in. The body stays on `requirement-local-login` |
 | 2026-10-14 | Active 1.1.6 | The menu-language pointer names front row 7 |
+| 2026-10-14 | Active 1.1.7 | The retired Python package and its requirements are removed |
+| 2026-10-16 | Active 1.1.8 | Product version **1.1.1**. Page skins stay on `requirement-html-theme` |
 
 ---
 
-**Last Updated**: 2026-10-14
+**Last Updated**: 2026-10-16
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

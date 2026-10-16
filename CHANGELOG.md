@@ -3,6 +3,19 @@
 All notable changes to **RustRbac** are documented here.
 Version SSOT: `Cargo.toml`.
 
+## [1.1.1] - 2026-10-16
+
+### Added
+
+- The web pages have two themes, `vue3` and `adminlte`. Enter selects vue3. Choice 2 selects adminlte. `rust-rbac theme` and server row 24 ask the same question and do not open the database. The form method, action, and field names stay. There is no script.
+- vue3 links `/element-plus.css` and `/rustrbac.css`. adminlte links `/adminlte.css`. Both skins set the document body to 13px. The side column scrolls on its own.
+- Menu list and menu add stay text-menu rows 18 and 19. The menus page can edit a menu, remove a menu, and save the sort. Those three actions are not numbered rows and they are not typed verbs. A fresh database seeds Menu edit and Menu remove.
+
+### Changed
+
+- The Python package, `pyproject.toml`, the Python tests, and the Python requirements are removed. Database names `pyrbac` and `pyrbac_test` stay refused.
+- HTML responses allow stylesheets from this site: `style-src 'self' 'unsafe-inline'`.
+
 ## [1.1.0] - 2026-10-11
 
 ### Changed

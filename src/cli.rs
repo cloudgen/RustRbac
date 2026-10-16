@@ -34,6 +34,7 @@ impl Cli {
         "serve",
         "db-init",
         "db-engine",
+        "theme",
         "user-list",
         "user-add",
         "user-edit",
@@ -245,6 +246,9 @@ fn dispatch(
     if verb == "db-engine" {
         return engine_verb(&desk, &parsed.options.engine, stdout_is_tty);
     }
+    if verb == "theme" {
+        return theme_verb(&desk, &parsed.options.theme, stdout_is_tty);
+    }
     if verb == "serve" {
         let text = desk.serve_background()?;
         if block_serve {
@@ -257,6 +261,21 @@ fn dispatch(
     let outcome = desk.execute(&verb, &parsed.options);
     record_note(log, desk.take_note());
     outcome
+}
+
+fn theme_verb(desk: &Desk, theme: &str, stdout_is_tty: bool) -> Result<String, AppError> {
+    if !theme.trim().is_empty() {
+        return desk.apply_theme(theme);
+    }
+    let mut lines = desk.theme_lines();
+    if !stdout_is_tty || !io::stdin().is_terminal() {
+        return Ok(lines.join("\n"));
+    }
+    let picked = prompt("Choice [vue3]: ", false);
+    if let Some(picked) = picked {
+        lines.push(desk.apply_theme(&picked)?);
+    }
+    Ok(lines.join("\n"))
 }
 
 fn engine_verb(desk: &Desk, engine: &str, stdout_is_tty: bool) -> Result<String, AppError> {
@@ -310,6 +329,8 @@ When that sign-in is missing or rejected, it asks for the account name\n\
 and a masked password. A wrong password asks again. Esc leaves without the menu.\n\
 Row 9 Exit asks before it logs out.\n\
 db-engine chooses sqlite3 or mysql and does not open the database.\n\
+theme chooses vue3 or adminlte and does not open the database.\n\
+Enter selects vue3. 2 selects adminlte. Server row 24 asks the same question.\n\
 With no arguments and no terminal, prints this help and stops.\n\
 Product verbs: {verbs}.\n\
 The text menu is a full-screen board with a bottom input box.\n\
@@ -437,6 +458,7 @@ fn flag_field(name: &str) -> Option<&'static str> {
         "content" => "content",
         "token" => "token",
         "engine" => "engine",
+        "theme" => "theme",
         _ => return None,
     })
 }
@@ -472,6 +494,7 @@ fn set_field(options: &mut VerbOptions, field: &str, value: String) {
         "content" => &mut options.content,
         "token" => &mut options.token,
         "engine" => &mut options.engine,
+        "theme" => &mut options.theme,
         _ => return,
     };
     *slot = value;
@@ -699,6 +722,27 @@ fn menu_step(
             }
         };
         match desk.apply_engine(&picked) {
+            Ok(text) => session.model.show_result(&text),
+            Err(error) => session.model.error = error.message,
+        }
+        return Ok(MenuStep::Stay);
+    }
+    if kind == "theme" {
+        let mut lines = desk.theme_lines();
+        lines.push("Choice [vue3]".to_string());
+        let picked = match read_field(&mut session.model, screen, "theme", &lines, false) {
+            FieldAnswer::Text(text) => text,
+            FieldAnswer::Esc => return Ok(MenuStep::Stay),
+            FieldAnswer::Eof => return Ok(MenuStep::Leave(String::new())),
+            FieldAnswer::Interrupt => return Ok(MenuStep::Interrupt),
+            FieldAnswer::TooSmall => {
+                return Err(AppError::new(
+                    "The terminal is too small for the text menu.",
+                    format!("{CONSOLE_NAME} help"),
+                ));
+            }
+        };
+        match desk.apply_theme(&picked) {
             Ok(text) => session.model.show_result(&text),
             Err(error) => session.model.error = error.message,
         }

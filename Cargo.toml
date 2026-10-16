@@ -1,6 +1,6 @@
 [package]
 name = "rust_rbac"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 description = "RustRbac is online RBAC and centralized configuration for the terminal and a local web page."
 license = "MIT"

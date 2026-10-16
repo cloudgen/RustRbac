@@ -17,6 +17,7 @@ use rust_rbac::menu::{
 use rust_rbac::password::PasswordHash;
 use rust_rbac::schema::Schema;
 use rust_rbac::settings::Settings;
+use rust_rbac::store::{field, Arg};
 use rust_rbac::web::WebApp;
 
 fn temp_dir(prefix: &str) -> PathBuf {
@@ -168,6 +169,12 @@ fn cli_gate_and_front_rows() {
     assert!(!Cli::PRODUCT_VERBS.contains(&"join"));
     assert!(!Cli::PRODUCT_VERBS.contains(&"list-videos"));
     assert!(!Cli::PRODUCT_VERBS.contains(&"language"));
+    assert!(!Cli::PRODUCT_VERBS.contains(&"menu-edit"));
+    assert!(!Cli::PRODUCT_VERBS.contains(&"menu-remove"));
+    assert!(!Cli::PRODUCT_VERBS.contains(&"menu-sort"));
+    assert!(!Cli::DOMAIN_VERBS.contains(&"menu-edit"));
+    assert!(!Cli::DOMAIN_VERBS.contains(&"menu-remove"));
+    assert!(!Cli::DOMAIN_VERBS.contains(&"menu-sort"));
     assert!(Cli::opens_text_screen(&[], true));
     assert!(Cli::opens_text_screen(&["about".to_string()], true));
     assert!(!Cli::opens_text_screen(&["login".to_string()], true));
@@ -185,6 +192,8 @@ fn cli_gate_and_front_rows() {
     assert!(!Cli::opens_text_screen(&["self-update".to_string()], true));
     assert!(!Cli::opens_text_screen(&[], false));
     assert!(!Cli::DOMAIN_VERBS.contains(&"db-engine"));
+    assert!(Cli::PRODUCT_VERBS.contains(&"theme"));
+    assert!(!Cli::DOMAIN_VERBS.contains(&"theme"));
     let home = temp_dir("rustrbac-menu-");
     let painter = MenuPainter::new(home.to_str().unwrap(), None);
     let rows = painter.display_rows("front");
@@ -216,13 +225,19 @@ fn cli_gate_and_front_rows() {
     let rbac = painter.rows_for("rbac");
     assert_eq!(rbac[0].number, 11);
     assert_eq!(rbac[9].number, 110);
+    let rbac_kinds: Vec<&str> = rbac.iter().map(|row| row.kind.as_str()).collect();
+    assert!(rbac_kinds.contains(&"menu-list"));
+    assert!(rbac_kinds.contains(&"menu-add"));
+    assert!(!rbac_kinds.contains(&"menu-edit"));
+    assert!(!rbac_kinds.contains(&"menu-remove"));
+    assert!(!rbac_kinds.contains(&"menu-sort"));
     assert_eq!(
         painter
             .rows_for("server")
             .iter()
             .map(|row| row.number)
             .collect::<Vec<_>>(),
-        vec![21, 22, 23, 0]
+        vec![21, 22, 23, 24, 0]
     );
     let setup = painter.rows_for("setup");
     assert_eq!(setup[setup.len() - 2].number, 218);
@@ -431,7 +446,7 @@ fn front_board_paints_the_tui_frame() {
     assert!(text.contains('╰'));
     assert!(text.contains('╯'));
     assert!(text.contains("│ > "));
-    assert!(text.contains("RustRbac 1.1.0"));
+    assert!(text.contains("RustRbac 1.1.1"));
     assert!(text.contains("main menu"));
     assert!(text.contains("14:05:09"));
     assert!(text.contains("1. rbac"));
@@ -521,8 +536,8 @@ fn about_page_and_docs_identity() {
         assert!(!std::path::Path::new(&report.preferred).exists());
     }
     let readme = fs::read_to_string("README.md").expect("readme");
-    assert!(readme.contains("version-1.1.0"));
-    assert_eq!(rust_rbac::VERSION, "1.1.0");
+    assert!(readme.contains("version-1.1.1"));
+    assert_eq!(rust_rbac::VERSION, "1.1.1");
     for heading in [
         "Features",
         "Advantages",
@@ -1077,6 +1092,95 @@ fn rejected_saved_sign_in_deletes_the_ciphertext() {
 }
 
 #[test]
+fn theme_does_not_open_the_database_and_paints_both_skins() {
+    let home = temp_dir("rustrbac-theme-");
+    let sqlite = home.join("absent.sqlite3");
+    let mut env = HashMap::new();
+    env.insert("RUSTRBAC_HOME".to_string(), home.display().to_string());
+    env.insert("HOME".to_string(), home.display().to_string());
+    env.insert(
+        "RUSTRBAC_SQLITE_FILE".to_string(),
+        sqlite.display().to_string(),
+    );
+    let painter = MenuPainter::new(home.to_str().unwrap(), None);
+    let front = painter.rows_for("front");
+    assert_eq!(front[1].explain, "setup, audit, and the web listener");
+    let server = painter.rows_for("server");
+    assert_eq!(server[3].number, 24);
+    assert_eq!(server[3].kind, "theme");
+    assert_eq!(server[3].explain, "vue3 or adminlte");
+
+    let (code, out, err) = run(&env, &["theme", "--theme", "2"]);
+    assert_eq!(code, 0, "{err}");
+    assert!(out.contains("adminlte"), "{out}");
+    assert!(!sqlite.exists());
+    let settings = home.join("database");
+    assert_eq!(mode_of(&settings), 0o600);
+
+    let desk = Desk::new(Some(env.clone()));
+    let web = WebApp::new(
+        Arc::clone(&desk.settings),
+        Arc::clone(&desk.access),
+        Arc::clone(&desk.catalog),
+        Arc::clone(&desk.schema),
+    );
+    let login = web.handle("GET", "/login", &[], "", "127.0.0.1");
+    assert_eq!(login.status, 200);
+    assert!(login.body.contains("href=\"/adminlte.css\""));
+    assert!(login.body.contains("name=\"user_name\""));
+    assert!(login.body.contains("name=\"engine\""));
+    assert!(login.body.contains("btn-lg") || login.body.contains("el-button--large"));
+    assert!(!login.body.contains("<script"));
+    assert!(!login.body.contains("el-scrollbar"));
+    assert!(!sqlite.exists());
+
+    let css = web.handle("GET", "/adminlte.css", &[], "", "127.0.0.1");
+    assert_eq!(css.status, 200);
+    let css_type = css
+        .headers
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case("content-type"))
+        .map(|(_, value)| value.as_str())
+        .unwrap_or("");
+    assert!(css_type.contains("text/css"), "{css_type}");
+    assert!(css.body.contains(".main-sidebar"));
+    assert!(css.body.contains("height: 100vh"));
+    assert!(css.body.contains("overflow: auto"));
+    assert!(css.body.contains("font-size: 13px"));
+
+    let sheet = fs::read_to_string(&settings).expect("settings");
+    fs::write(
+        &settings,
+        sheet.replace("RUSTRBAC_THEME=adminlte", "RUSTRBAC_THEME=vue3"),
+    )
+    .expect("rewrite");
+    fs::set_permissions(&settings, fs::Permissions::from_mode(0o600)).expect("mode");
+    let again = web.handle("GET", "/login", &[], "", "127.0.0.1");
+    assert_eq!(again.status, 200);
+    assert!(again.body.contains("href=\"/element-plus.css\""));
+    assert!(again.body.contains("href=\"/rustrbac.css\""));
+    assert!(!again.body.contains("<script"));
+    let vue = web.handle("GET", "/rustrbac.css", &[], "", "127.0.0.1");
+    assert!(vue.body.contains("font-size: 13px"));
+    assert!(!sqlite.exists());
+
+    let mut bad_env = env.clone();
+    bad_env.insert("RUSTRBAC_THEME".to_string(), "neon".to_string());
+    let bad_desk = Desk::new(Some(bad_env));
+    let bad_web = WebApp::new(
+        Arc::clone(&bad_desk.settings),
+        Arc::clone(&bad_desk.access),
+        Arc::clone(&bad_desk.catalog),
+        Arc::clone(&bad_desk.schema),
+    );
+    let bad = bad_web.handle("GET", "/login", &[], "", "127.0.0.1");
+    assert_eq!(bad.status, 400);
+    assert!(bad.body.contains("RUSTRBAC_THEME must be vue3 or adminlte."));
+    assert!(!bad.body.contains("stylesheet"));
+    assert!(!sqlite.exists());
+}
+
+#[test]
 fn help_mentions_cargo_and_not_a_publish() {
     let (code, out, err) = run(&HashMap::new(), &["help"]);
     assert_eq!(code, 0, "{err}");
@@ -1086,10 +1190,536 @@ fn help_mentions_cargo_and_not_a_publish() {
     assert!(!out.contains("crates.io"));
     let (code, out, err) = run(&HashMap::new(), &["version"]);
     assert_eq!(code, 0, "{err}");
-    assert!(out.contains("RustRbac 1.1.0"), "{out}");
+    assert!(out.contains("RustRbac 1.1.1"), "{out}");
     let (code, out, err) = run(&HashMap::new(), &["self-install"]);
     assert_eq!(code, 0, "{err}");
     assert!(out.contains("cargo install --path ."), "{out}");
+}
+
+#[test]
+fn menu_records_and_page() {
+    let fixture = SqliteHome::new();
+    let env = fixture.env();
+    let desk = Desk::new(Some(env));
+    desk.db_init().expect("seed");
+    let admin = desk.access.user_by_id("1").expect("admin").expect("row");
+    let operator = desk.access.user_by_id("2").expect("operator").expect("row");
+    let edit_perm = desk
+        .store
+        .query_one("SELECT perms FROM sys_menu WHERE menu_id = 1022", &[])
+        .expect("query")
+        .expect("1022");
+    assert_eq!(field(&edit_perm, "perms"), "system:menu:edit");
+    let remove_perm = desk
+        .store
+        .query_one("SELECT perms FROM sys_menu WHERE menu_id = 1023", &[])
+        .expect("query")
+        .expect("1023");
+    assert_eq!(field(&remove_perm, "perms"), "system:menu:remove");
+    assert!(desk
+        .store
+        .query_one(
+            "SELECT menu_id FROM sys_role_menu WHERE role_id = 2 AND menu_id = 1022",
+            &[],
+        )
+        .expect("query")
+        .is_none());
+    let denied = desk
+        .access
+        .menu_list(&operator)
+        .expect_err("operator list");
+    assert!(denied.message.starts_with("Missing permission system:menu:list"));
+    let listed = desk.access.menu_list(&admin).expect("list");
+    let user = listed
+        .iter()
+        .find(|row| field(row, "menu_name") == "User")
+        .expect("user row");
+    assert_eq!(field(user, "menu_type"), "C");
+    assert_eq!(field(user, "perms"), "system:user:list");
+    let bad_type = desk
+        .access
+        .menu_add(&admin, "Bad", 0, "X", "", "")
+        .expect_err("type");
+    assert_eq!(bad_type.message, "menu_type must be M, C, or F.");
+    let added = desk
+        .access
+        .menu_add(&admin, "Export", 0, "F", "system:user:export", "")
+        .expect("add");
+    let again = desk.access.menu_list(&admin).expect("list again");
+    assert!(again.iter().any(|row| {
+        field(row, "menu_id") == added.to_string() && field(row, "menu_type") == "F"
+    }));
+    assert!(desk
+        .store
+        .query_one(
+            "SELECT menu_id FROM sys_role_menu WHERE menu_id = ?",
+            &[Arg::from(added)],
+        )
+        .expect("grant")
+        .is_none());
+    let report = desk
+        .execute("menu-list", &VerbOptions::default())
+        .expect_err("signed out");
+    assert!(report.message.starts_with("Not signed in"));
+    let signed = VerbOptions {
+        user_name: "admin".to_string(),
+        password: Schema::INITIAL_ADMIN_PASSWORD.to_string(),
+        ..VerbOptions::default()
+    };
+    desk.execute("login", &signed).expect("login");
+    let text = desk
+        .execute("menu-list", &VerbOptions::default())
+        .expect("report");
+    assert!(text.starts_with("menu_id|parent_id|menu_name|menu_type|perms\n"), "{text}");
+    assert!(text.contains("|User|C|system:user:list"));
+
+    let parent = desk
+        .access
+        .menu_add(&admin, "Sort parent", 0, "M", "", "")
+        .expect("parent");
+    let child = desk
+        .access
+        .menu_add(&admin, "Sort child", parent, "C", "", "")
+        .expect("child");
+    let leaf = desk
+        .access
+        .menu_add(&admin, "Sort leaf", parent, "F", "", "")
+        .expect("leaf");
+    desk.store
+        .execute(
+            "INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, ?)",
+            &[Arg::from(leaf)],
+        )
+        .expect("link");
+    let blocked = desk
+        .access
+        .menu_remove(&admin, &parent.to_string())
+        .expect_err("children");
+    assert_eq!(blocked.message, "That menu has children.");
+    let denied_edit = desk
+        .access
+        .menu_edit(&operator, "102", "Menu", "1", "C", "", "", "0")
+        .expect_err("operator edit");
+    assert!(denied_edit.message.starts_with("Missing permission"));
+    desk.access
+        .menu_edit(
+            &admin,
+            &child.to_string(),
+            "Sort renamed",
+            &parent.to_string(),
+            "C",
+            "system:menu:renamed",
+            "moved",
+            "1",
+        )
+        .expect("edit");
+    let row = desk
+        .store
+        .query_one(
+            "SELECT menu_name, parent_id, menu_type, perms, path, visible, order_num FROM sys_menu WHERE menu_id = ?",
+            &[Arg::from(child)],
+        )
+        .expect("query")
+        .expect("child");
+    assert_eq!(field(&row, "menu_name"), "Sort renamed");
+    assert_eq!(field(&row, "parent_id"), parent.to_string());
+    assert_eq!(field(&row, "menu_type"), "C");
+    assert_eq!(field(&row, "perms"), "system:menu:renamed");
+    assert_eq!(field(&row, "path"), "moved");
+    assert_eq!(field(&row, "visible"), "1");
+    assert_eq!(field(&row, "order_num"), "0");
+    let edited = desk
+        .store
+        .query_one(
+            "SELECT title, business_type, method, oper_param FROM sys_oper_log WHERE method = 'menu_edit' ORDER BY oper_id DESC",
+            &[],
+        )
+        .expect("query")
+        .expect("audit");
+    assert_eq!(field(&edited, "title"), "Menu");
+    assert_eq!(field(&edited, "business_type"), "2");
+    assert_eq!(field(&edited, "oper_param"), "Sort renamed");
+    let cycle = desk
+        .access
+        .menu_edit(
+            &admin,
+            &parent.to_string(),
+            "Sort parent",
+            &child.to_string(),
+            "M",
+            "",
+            "",
+            "0",
+        )
+        .expect_err("cycle");
+    assert_eq!(cycle.message, "A menu cannot sit under itself.");
+    let itself = desk
+        .access
+        .menu_edit(
+            &admin,
+            &parent.to_string(),
+            "Sort parent",
+            &parent.to_string(),
+            "M",
+            "",
+            "",
+            "0",
+        )
+        .expect_err("itself");
+    assert_eq!(itself.message, "A menu cannot sit under itself.");
+    let missing_parent = desk
+        .access
+        .menu_edit(&admin, &parent.to_string(), "Sort parent", "99999", "M", "", "", "0")
+        .expect_err("parent");
+    assert!(missing_parent.message.contains("Unknown parent menu"));
+    let blank_type = desk
+        .access
+        .menu_edit(&admin, &parent.to_string(), "Sort parent", "0", "", "", "", "0")
+        .expect_err("type");
+    assert_eq!(blank_type.message, "menu_type must be M, C, or F.");
+    let unchanged = desk
+        .store
+        .query_one(
+            "SELECT menu_type FROM sys_menu WHERE menu_id = ?",
+            &[Arg::from(parent)],
+        )
+        .expect("query")
+        .expect("parent");
+    assert_eq!(field(&unchanged, "menu_type"), "M");
+    let bad_name = desk
+        .access
+        .menu_edit(&admin, &parent.to_string(), "", "0", "M", "", "", "0")
+        .expect_err("name");
+    assert_eq!(bad_name.message, "menu_name is required.");
+    let bad_visible = desk
+        .access
+        .menu_edit(&admin, &parent.to_string(), "Sort parent", "0", "M", "", "", "2")
+        .expect_err("visible");
+    assert_eq!(bad_visible.message, "visible must be 0 or 1.");
+    desk.access
+        .menu_edit(&admin, &leaf.to_string(), "Sort leaf", &parent.to_string(), "F", "", "", "")
+        .expect("empty visible");
+    let shown = desk
+        .store
+        .query_one(
+            "SELECT visible FROM sys_menu WHERE menu_id = ?",
+            &[Arg::from(leaf)],
+        )
+        .expect("query")
+        .expect("leaf");
+    assert_eq!(field(&shown, "visible"), "0");
+    let unknown = desk
+        .access
+        .menu_edit(&admin, "99999", "Missing", "0", "C", "", "", "0")
+        .expect_err("missing");
+    assert!(unknown.message.contains("Unknown menu"));
+    desk.store
+        .execute(
+            "UPDATE sys_menu SET status = '1' WHERE menu_id = ?",
+            &[Arg::from(leaf)],
+        )
+        .expect("disable");
+    let disabled = desk
+        .access
+        .menu_remove(&admin, &leaf.to_string())
+        .expect_err("disabled");
+    assert!(disabled.message.contains("Unknown menu"));
+    let visible = desk.access.menu_list(&admin).expect("visible");
+    assert!(!visible.iter().any(|row| field(row, "menu_id") == leaf.to_string()));
+    desk.store
+        .execute(
+            "UPDATE sys_menu SET status = '0' WHERE menu_id = ?",
+            &[Arg::from(leaf)],
+        )
+        .expect("enable");
+    let before = field(
+        &desk
+            .store
+            .query_one(
+                "SELECT order_num FROM sys_menu WHERE menu_id = ?",
+                &[Arg::from(child)],
+            )
+            .expect("query")
+            .expect("order"),
+        "order_num",
+    )
+    .to_string();
+    let bad_order = desk
+        .access
+        .menu_sort(&admin, &[child.to_string()], &["nope".to_string()])
+        .expect_err("nope");
+    assert_eq!(bad_order.message, "order_num must be a number.");
+    let too_big = desk
+        .access
+        .menu_sort(&admin, &[child.to_string()], &["10000".to_string()])
+        .expect_err("10000");
+    assert_eq!(too_big.message, "order_num must be a number.");
+    let mismatch = desk
+        .access
+        .menu_sort(
+            &admin,
+            &[child.to_string(), leaf.to_string()],
+            &["3".to_string()],
+        )
+        .expect_err("short");
+    assert_eq!(mismatch.message, "Choose a sort for each menu.");
+    let stayed = desk
+        .store
+        .query_one(
+            "SELECT order_num FROM sys_menu WHERE menu_id = ?",
+            &[Arg::from(child)],
+        )
+        .expect("query")
+        .expect("order");
+    assert_eq!(field(&stayed, "order_num"), before);
+    desk.access
+        .menu_sort(
+            &admin,
+            &[child.to_string(), leaf.to_string()],
+            &["".to_string(), "4".to_string()],
+        )
+        .expect("sort");
+    assert_eq!(
+        order_of(&desk, child),
+        "0"
+    );
+    assert_eq!(order_of(&desk, leaf), "4");
+    let sorted = desk
+        .store
+        .query_one(
+            "SELECT title, business_type, method, oper_param FROM sys_oper_log WHERE method = 'menu_sort' ORDER BY oper_id DESC",
+            &[],
+        )
+        .expect("query")
+        .expect("audit");
+    assert_eq!(field(&sorted, "title"), "Menu");
+    assert_eq!(field(&sorted, "business_type"), "2");
+    assert_eq!(field(&sorted, "oper_param"), "2");
+    desk.access
+        .menu_sort(&admin, &[child.to_string()], &["9999".to_string()])
+        .expect("9999");
+    assert_eq!(order_of(&desk, child), "9999");
+    desk.access
+        .menu_remove(&admin, &leaf.to_string())
+        .expect("remove leaf");
+    assert!(desk
+        .store
+        .query_one(
+            "SELECT menu_id FROM sys_menu WHERE menu_id = ?",
+            &[Arg::from(leaf)],
+        )
+        .expect("query")
+        .is_none());
+    assert!(desk
+        .store
+        .query_one(
+            "SELECT menu_id FROM sys_role_menu WHERE menu_id = ?",
+            &[Arg::from(leaf)],
+        )
+        .expect("query")
+        .is_none());
+    let removed = desk
+        .store
+        .query_one(
+            "SELECT title, business_type, method, oper_param FROM sys_oper_log WHERE method = 'menu_remove' ORDER BY oper_id DESC",
+            &[],
+        )
+        .expect("query")
+        .expect("audit");
+    assert_eq!(field(&removed, "title"), "Menu");
+    assert_eq!(field(&removed, "business_type"), "3");
+    assert_eq!(field(&removed, "oper_param"), "Sort leaf");
+    let still = desk
+        .access
+        .menu_remove(&admin, &parent.to_string())
+        .expect_err("still");
+    assert_eq!(still.message, "That menu has children.");
+    desk.access
+        .menu_remove(&admin, &child.to_string())
+        .expect("remove child");
+    desk.access
+        .menu_remove(&admin, &parent.to_string())
+        .expect("remove parent");
+
+    let web = WebApp::new(
+        Arc::clone(&desk.settings),
+        Arc::clone(&desk.access),
+        Arc::clone(&desk.catalog),
+        Arc::clone(&desk.schema),
+    );
+    let admin_cookie = sign_in(
+        &web,
+        "admin",
+        Schema::INITIAL_ADMIN_PASSWORD,
+        "127.0.0.1",
+    );
+    let page = web.handle(
+        "GET",
+        "/menus",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert_eq!(page.status, 200);
+    for word in [">Add<", ">Edit<", ">Save sort<", ">Choose<", ">Remove<"] {
+        assert!(page.body.contains(word), "{word} missing");
+    }
+    assert!(page.body.contains("action=\"/menus/sort\""));
+    let bare = web.handle(
+        "GET",
+        "/menus?form=edit",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert!(bare.body.contains("Choose a menu."));
+    assert!(!bare.body.contains("action=\"/menus/edit\""));
+    assert!(!bare.body.contains("Edit a menu"));
+    let editing = web.handle(
+        "GET",
+        "/menus?form=edit&menu_id=100",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert!(editing.body.contains("Edit a menu"));
+    assert!(editing.body.contains("action=\"/menus/edit\""));
+    assert!(editing.body.contains("value=\"User\""));
+    assert!(editing.body.contains("value=\"C\" checked"));
+    assert!(editing.body.contains("value=\"system:user:list\""));
+    let missing = web.handle(
+        "GET",
+        "/menus?form=remove&menu_id=99999",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert!(missing.body.contains("That menu is not in this list."));
+    assert!(!missing.body.contains("action=\"/menus/remove\""));
+    let folded = web.handle(
+        "GET",
+        "/menus?closed=1",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert!(folded.body.contains(">System<"));
+    assert!(folded.body.contains(">Setup<"));
+    assert!(!folded.body.contains(">User<"));
+    let found = web.handle(
+        "GET",
+        "/menus?menu_name=Role",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert!(found.body.contains(">System<"));
+    assert!(found.body.contains(">Role<"));
+    assert!(!found.body.contains(">User<"));
+    assert!(!found.body.contains(">Setup<"));
+    let token = csrf_of(&page.body);
+    let posted = web.handle(
+        "POST",
+        "/menus/add",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={admin_cookie}"),
+        )],
+        &format!(
+            "csrf={token}&menu_name=Kept&parent_id=0&menu_type=&keep_name=Role&keep_state=0&keep_closed=1"
+        ),
+        "127.0.0.1",
+    );
+    assert!(posted.status == 302 || posted.status == 303, "{}", posted.body);
+    let location = posted
+        .headers
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case("location"))
+        .map(|(_, value)| value.as_str())
+        .unwrap_or("");
+    assert_eq!(location, "/menus?menu_name=Role&state=0&closed=1");
+    let kept = desk
+        .store
+        .query_one(
+            "SELECT menu_type FROM sys_menu WHERE menu_name = 'Kept'",
+            &[],
+        )
+        .expect("query")
+        .expect("kept");
+    assert_eq!(field(&kept, "menu_type"), "F");
+
+    desk.store
+        .execute(
+            "INSERT INTO sys_role_menu (role_id, menu_id) VALUES (2, 102)",
+            &[],
+        )
+        .expect("grant list");
+    let operator_cookie = sign_in(
+        &web,
+        "operator",
+        Schema::INITIAL_OPERATOR_PASSWORD,
+        "127.0.0.1",
+    );
+    let limited = web.handle(
+        "GET",
+        "/menus",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={operator_cookie}"),
+        )],
+        "",
+        "127.0.0.1",
+    );
+    assert_eq!(limited.status, 200, "{}", limited.body);
+    assert!(!limited.body.contains(">Edit<"));
+    assert!(!limited.body.contains(">Save sort<"));
+    assert!(!limited.body.contains("action=\"/menus/sort\""));
+    assert!(!limited.body.contains(">Choose<"));
+    let operator_edit = web.handle(
+        "POST",
+        "/menus/edit",
+        &[(
+            "Cookie".to_string(),
+            format!("rust_rbac_session={operator_cookie}"),
+        )],
+        &format!("csrf={}&menu_id=100&menu_name=User&parent_id=1&menu_type=C", csrf_of(&limited.body)),
+        "127.0.0.1",
+    );
+    assert_eq!(operator_edit.status, 403);
+    assert!(operator_edit.body.contains("Missing permission"));
+}
+
+fn order_of(desk: &Desk, menu_id: i64) -> String {
+    field(
+        &desk
+            .store
+            .query_one(
+                "SELECT order_num FROM sys_menu WHERE menu_id = ?",
+                &[Arg::from(menu_id)],
+            )
+            .expect("query")
+            .expect("order"),
+        "order_num",
+    )
+    .to_string()
 }
 
 #[allow(dead_code)]

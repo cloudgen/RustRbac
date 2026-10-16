@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-rust-tui.md
-**Status**: Active (Version 1.1.0)
+**Status**: Active (Version 1.1.2)
 **Area**: rust
 **Key**: `requirement-rust-tui`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -25,19 +25,19 @@ The same domain actions are typed verbs (`requirement-rust-cli-interface`) and w
 | Number | Kind | Role |
 |--------|------|------|
 | 1 | rbac | users, roles, menus, departments, posts. Children 11–19 and 110–113. Back 0 returns to the front board |
-| 2 | server | setup 21, audit 22, serve 23. Back 0 returns to the front board |
+| 2 | server | setup 21, audit 22, serve 23, theme 24. Back 0 returns to the front board |
 | 3 | system-log | view-log 31, clear-log 32, log-folder 33, Back 0 |
 | 6 | self-management | 62 version, 63 about, 64 version-check, 65 self-update, 66 self-uninstall, 67 self-install, Back 0 |
 | 7 | language | codes 71–83 and Back 0 |
 | 9 | Exit | ask first, then leave with status 0. Enter or `y` logs out. `n` keeps the saved sign-in. Esc stays |
 
-Setup is server row 21. Its children are 211–218. Number 218 is `db-engine`. Back 0 returns to the server board. Audit is server row 22. Its children are 221–224. Back 0 returns to the server board. Serve is server row 23. It starts the web listener and shows the URL. It is not its own board. Numbers 4, 5, and 8 are not rows. The word `access` opens the rbac board.
+Setup is server row 21. Its children are 211–218. Number 218 is `db-engine`. Back 0 returns to the server board. Audit is server row 22. Its children are 221–224. Back 0 returns to the server board. Serve is server row 23. It starts the web listener and shows the URL. It is not its own board. Theme is server row 24. Its explain is `vue3 or adminlte`. It stores the skin and does not open the database. The rules are `requirement-html-theme`. Numbers 4, 5, and 8 are not rows. The word `access` opens the rbac board. The front-board explain for server stays `setup, audit, and the web listener`.
 
-`help` is a word on the open menu. It is not a numbered row. There is no session row.
+`help` is a word on the open menu. It is not a numbered row. There is no session row. Rbac rows 18 and 19 are `menu-list` and `menu-add`. Edit, remove, and save sort are `requirement-rbac-menu`. They are not rows on this menu.
 
 ## 3. Normative rules
 
-1. **Rows.** The front board **MUST** show rows 1 rbac, 2 server, 3 system-log, 6 self-management, 7 language, and 9 Exit. It **MUST NOT** show a session row. Numbers 4, 5, and 8 **MUST NOT** be rows. Row 7 **MUST** be language. Row 9 **MUST** be Exit. Rbac children **MUST** be 11–19 and 110–113. Server **MUST** hold setup 21, audit 22, and serve 23. Setup children **MUST** be 211–218, and 218 **MUST** be `db-engine`. Audit children **MUST** be 221–224. Self-management children **MUST** be 62–67. System-log children stay 31–33. Back on setup and on audit **MUST** return to the server board. Back on rbac, server, system-log, language, and self-management **MUST** return to the front board. Esc on a nested board **MUST** return to the front board. The word `access` **MUST** open the rbac board.
+1. **Rows.** The front board **MUST** show rows 1 rbac, 2 server, 3 system-log, 6 self-management, 7 language, and 9 Exit. It **MUST NOT** show a session row. Numbers 4, 5, and 8 **MUST NOT** be rows. Row 7 **MUST** be language. Row 9 **MUST** be Exit. Rbac children **MUST** be 11–19 and 110–113. Server **MUST** hold setup 21, audit 22, serve 23, and theme 24. The front-board explain for server **MUST** stay `setup, audit, and the web listener`. Theme **MUST NOT** open the database. Setup children **MUST** be 211–218, and 218 **MUST** be `db-engine`. Audit children **MUST** be 221–224. Self-management children **MUST** be 62–67. System-log children stay 31–33. Back on setup and on audit **MUST** return to the server board. Back on rbac, server, system-log, language, and self-management **MUST** return to the front board. Esc on a nested board **MUST** return to the front board. The word `access` **MUST** open the rbac board. Rbac rows 18 and 19 **MUST** be `menu-list` and `menu-add`. `menu-edit`, `menu-remove`, and `menu-sort` **MUST NOT** be rows. Those actions are `requirement-rbac-menu`.
 2. **Sign-in first.** Empty arguments on a terminal **MUST** prepare the database with the current engine and **MUST NOT** ask for an engine. They **MUST** try the saved sign-in from `requirement-local-login` before any account question. When that sign-in is missing or rejected, they **MUST** ask for the account and a masked password, one field at a time. A wrong password **MUST** show the error and ask again. A match **MUST** open the front board. The menu **MUST NOT** appear before that match. Esc on the sign-in question **MUST** leave without the menu.
 3. **Path label.** The path line **MUST** use the path label from `requirement-rust-cli-language`. `LANG` and `LC_ALL` **MUST NOT** select it. The directory and the clock are not translated.
 4. **Display width.** An East Asian Wide or Fullwidth character (Unicode width class W or F) **MUST** count as 2 columns. An ambiguous character **MUST** count as 1. A wide character that does not fit **MUST** be dropped whole.
@@ -57,6 +57,7 @@ Setup is server row 21. Its children are 211–218. Number 218 is `db-engine`. B
 | AC-4 | Self-management text says cargo, not pip |
 | AC-5 | Enter or `y` logs out, `n` keeps the saved sign-in, Esc stays, and end of input does not log out |
 | AC-6 | The front board paints `╭` `─` `╮`, `│ > `, `╰` `╯`, the path clock, and `RustRbac` plus the version on the status line, and it does not paint `Choice:` |
+| AC-7 | Rbac rows include 18 `menu-list` and 19 `menu-add`, and do not include `menu-edit`, `menu-remove`, or `menu-sort` |
 
 ## Terminologies
 
@@ -74,9 +75,11 @@ Setup is server row 21. Its children are 211–218. Number 218 is `db-engine`. B
 | 2026-10-11 | Active 1.0.1 | Empty argv tries the saved sign-in. Row 9 Exit asks before logout |
 | 2026-10-14 | Active 1.0.2 | The boards are the full-screen box from the HolaTui bootstrap. Questions use that box. Typed verbs stay on the command line |
 | 2026-10-14 | Active 1.1.0 | Row 1 is rbac. Row 2 server holds setup, audit, and serve. Self-management is 6. Language is 7. Codes are 71–83 |
+| 2026-10-15 | Active 1.1.1 | Rows 18 and 19 stay menu-list and menu-add. Edit, remove, and save sort are not rows |
+| 2026-10-16 | Active 1.1.2 | Server row 24 is theme. The front explain stays setup, audit, and the web listener |
 
 ---
 
-**Last Updated**: 2026-10-14
+**Last Updated**: 2026-10-16
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

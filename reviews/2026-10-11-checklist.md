@@ -5,7 +5,7 @@ Use this list before treating the Rust edition as ready. The earlier PyRbac chec
 ## Requirements
 
 - [x] Exactly one Active domain file: `requirement-domain-rust-rbac`
-- [x] `requirement-domain-pyrbac` and `requirement-python-*` are Retired and still on disk
+- [x] On 2026-10-11, `requirement-domain-pyrbac` and `requirement-python-*` were Retired and still on disk. On 2026-10-14 those files, `pyproject.toml`, and `src/PyRbac` were removed. Database names `pyrbac` and `pyrbac_test` stay refused
 - [x] `requirement-database` is Active 2.0.1 for `rust_rbac` / `RUSTRBAC_*`
 - [x] Independent `requirement-rust-*` files are Active, including the CLI and the build script
 - [x] Those two files contain the section "Under command line for normal user only"

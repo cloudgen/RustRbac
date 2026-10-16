@@ -1,12 +1,12 @@
 **file**: docs/requirements/requirement-environment.md
-**Status**: Active (Version 1.0.2)
+**Status**: Active (Version 1.0.3)
 **Area**: domain
 **Key**: `requirement-environment`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
 
-Process settings for RustRbac 1.1.0 come from the environment, then from a mode-0600 file, then from defaults. The binary is `rust-rbac`. Defaults never include a database password. The default engine is sqlite3. The web listener stays on `127.0.0.1:8765` unless the operator sets an explicit allow. `RUSTRBAC_ALLOW_REMOTE` is environment-only.
+Process settings for RustRbac 1.1.1 come from the environment, then from a mode-0600 file, then from defaults. The binary is `rust-rbac`. Defaults never include a database password. The default engine is sqlite3. The web listener stays on `127.0.0.1:8765` unless the operator sets an explicit allow. `RUSTRBAC_ALLOW_REMOTE` is environment-only.
 
 ### 1.1 Human-facing
 
@@ -40,6 +40,7 @@ Process settings for RustRbac 1.1.0 come from the environment, then from a mode-
 | `RUSTRBAC_ALLOW_REMOTE` | unset | Environment only. Must be `yes` before a non-loopback bind |
 | `RUSTRBAC_LANG` | unset | Menu language. Overrides the leaf and does not write it |
 | `RUSTRBAC_HOME` | unset | When set, replaces `~/.local/RustRbac` for the session file, the saved sign-in files, the language leaf, and the database file |
+| `RUSTRBAC_THEME` | empty, means vue3 | `vue3` or `adminlte`. Choice 1 is vue3. Choice 2 is adminlte. This name does not open the database |
 
 ## 3. Normative rules
 
@@ -49,6 +50,7 @@ Process settings for RustRbac 1.1.0 come from the environment, then from a mode-
 4. **Bind.** The default is `127.0.0.1:8765`. `127.0.0.1`, `localhost`, and `::1` are loopback. Any other address **MUST** be refused unless `RUSTRBAC_ALLOW_REMOTE` is `yes`. That name **MUST** be read from the environment only. A value in the database file **MUST NOT** allow a remote bind.
 5. **Language.** `RUSTRBAC_LANG` **MUST** override the menu language for this process and **MUST NOT** write `~/.local/RustRbac/language`. `LANG` and `LC_ALL` **MUST NOT** select a language.
 6. **Secrets in docs.** Versioned product documents **MUST NOT** contain a host vault path, a private key name, or a live password. The seeded initial passwords in the user document are the demo values the operator is told to change. The program **MUST NOT** call `sudo`.
+7. **Theme.** `RUSTRBAC_THEME` **MUST** be empty, `vue3`, or `adminlte`. Empty means `vue3`. A non-empty environment value **MUST** win over the file. Reading it **MUST NOT** open the database. The page rules are `requirement-html-theme`.
 
 ## 4. Acceptance checks
 
@@ -74,9 +76,10 @@ Process settings for RustRbac 1.1.0 come from the environment, then from a mode-
 | 2026-10-11 | Active 1.0.0 | Environment names, 0600 file, loopback bind |
 | 2026-10-11 | Active 1.0.1 | Prefix `RUSTRBAC_`. Home `~/.local/RustRbac`. Binary `rust-rbac`. Product 1.1.0. Allow-remote is environment-only |
 | 2026-10-11 | Active 1.0.2 | Home also holds `local-login` and `local-login-key`. Cipher law stays on `requirement-local-login` |
+| 2026-10-16 | Active 1.0.3 | `RUSTRBAC_THEME` is vue3 or adminlte. Empty means vue3. The environment wins |
 
 ---
 
-**Last Updated**: 2026-10-11
+**Last Updated**: 2026-10-16
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

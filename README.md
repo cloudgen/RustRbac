@@ -1,6 +1,6 @@
 # RustRbac - online role-based access control and centralized configuration
 
-![Version 1.1.0](https://img.shields.io/badge/version-1.1.0-blue)
+![Version 1.1.1](https://img.shields.io/badge/version-1.1.1-blue)
 ![License MIT](https://img.shields.io/badge/license-MIT-green)
 [![CIAO](https://img.shields.io/badge/CIAO-cloudgen-black)](https://github.com/cloudgen/ciao)
 [![Stars](https://img.shields.io/github/stars/cloudgen/RustRbac?style=flat-square)](https://github.com/cloudgen/RustRbac)
@@ -15,7 +15,8 @@ The web pages are plain HTML. There is no JavaScript bundle. This crate is not p
 ## Features
 
 - A terminal with no arguments uses the current engine, tries the saved sign-in, and opens the menu. It asks for the account name only when that sign-in is missing or rejected.
-- Front board rows: 1 rbac, 2 server, 3 system-log, 6 self-management, 7 language, and 9 Exit. Server holds setup, audit, and serve. There is no session row. Exit asks before it leaves. Enter or y logs out. n keeps the saved sign-in. Esc stays.
+- Front board rows: 1 rbac, 2 server, 3 system-log, 6 self-management, 7 language, and 9 Exit. Server holds setup, audit, serve, and theme. There is no session row. Exit asks before it leaves. Enter or y logs out. n keeps the saved sign-in. Esc stays.
+- The web pages use theme `vue3` or `adminlte`. Enter selects vue3. Choice 2 selects adminlte. The form names stay. There is no script.
 - The same user, role, menu, department, post, parameter, dictionary, notice, and audit actions on the menu, on the command line, and on the web page.
 - Data scope 1 all, 2 custom departments, 3 this department, 4 this department and children. Any other scope shows no rows.
 - sqlite3 or MariaDB or MySQL. The default is the sqlite3 file `~/.local/RustRbac/rust_rbac.sqlite3`. mysql uses the database `rust_rbac`.
@@ -67,7 +68,7 @@ rust-rbac db-init
 On a terminal, `rust-rbac` asks for the account when no saved sign-in is present:
 
 ```text
-**RustRbac**(*1.1.0*) — sign-in
+**RustRbac**(*1.1.1*) — sign-in
 
 Password
 ```
@@ -75,7 +76,7 @@ Password
 The password field is masked. After a match, the main menu is:
 
 ```text
-**RustRbac**(*1.1.0*) │ main menu
+**RustRbac**(*1.1.1*) │ main menu
 
 1. **rbac**: *users, roles, menus, departments, and posts*
 2. **server**: *setup, audit, and the web listener*
@@ -90,7 +91,7 @@ Choose a number and press Enter. `9` leaves. `0` on a nested board goes back.
 Rbac:
 
 ```text
-**RustRbac**(*1.1.0*) │ rbac
+**RustRbac**(*1.1.1*) │ rbac
 
 11. **user-list**: *accounts you are allowed to see*
 12. **user-add**: *add an account*
@@ -108,21 +109,24 @@ Rbac:
 0. **Back**: *return to the main menu*
 ```
 
+Rows 18 and 19 list menus and add one. The page `/menus` can edit a menu, remove a menu, and save the sort. Those three actions are not numbered rows and they are not typed verbs.
+
 Server:
 
 ```text
-**RustRbac**(*1.1.0*) │ server
+**RustRbac**(*1.1.1*) │ server
 
 21. **setup**: *parameters, dictionaries, and notices*
 22. **audit**: *operation log, login log, and online users*
 23. **serve**: *start the web interface on this computer*
+24. **theme**: *vue3 or adminlte*
 0. **Back**: *return to the main menu*
 ```
 
 Setup:
 
 ```text
-**RustRbac**(*1.1.0*) │ setup
+**RustRbac**(*1.1.1*) │ setup
 
 211. **config-list**: *parameters*
 212. **config-set**: *change one parameter*
@@ -138,7 +142,7 @@ Setup:
 Audit:
 
 ```text
-**RustRbac**(*1.1.0*) │ audit
+**RustRbac**(*1.1.1*) │ audit
 
 221. **oper-log**: *operation log*
 222. **login-log**: *login log*
@@ -150,7 +154,7 @@ Audit:
 System log:
 
 ```text
-**RustRbac**(*1.1.0*) │ system-log
+**RustRbac**(*1.1.1*) │ system-log
 
 31. **view-log**: *list a log file and show it*
 32. **clear-log**: *empty one log file*
@@ -161,7 +165,7 @@ System log:
 Self-management:
 
 ```text
-**RustRbac**(*1.1.0*) │ self-management
+**RustRbac**(*1.1.1*) │ self-management
 
 62. **version**: *show the installed version*
 63. **about**: *version and this computer*
@@ -175,7 +179,7 @@ Self-management:
 Language:
 
 ```text
-**RustRbac**(*1.1.0*) │ language
+**RustRbac**(*1.1.1*) │ language
 
 71. **English**: *use English for this menu*
 72. **简体中文**: *use 简体中文 for this menu*
@@ -196,7 +200,7 @@ Language:
 Traditional Chinese front board:
 
 ```text
-**RustRbac**(*1.1.0*) │ 主選單
+**RustRbac**(*1.1.1*) │ 主選單
 
 1. **rbac**: *users, roles, menus, departments, and posts*
 2. **server**: *setup, audit, and the web listener*
@@ -209,7 +213,7 @@ Traditional Chinese front board:
 Simplified Chinese front board:
 
 ```text
-**RustRbac**(*1.1.0*) │ 主菜单
+**RustRbac**(*1.1.1*) │ 主菜单
 
 1. **rbac**: *users, roles, menus, departments, and posts*
 2. **server**: *setup, audit, and the web listener*
@@ -222,7 +226,7 @@ Simplified Chinese front board:
 Japanese front board:
 
 ```text
-**RustRbac**(*1.1.0*) │ メインメニュー
+**RustRbac**(*1.1.1*) │ メインメニュー
 
 1. **rbac**: *users, roles, menus, departments, and posts*
 2. **server**: *setup, audit, and the web listener*
@@ -277,10 +281,13 @@ A suggested password for a new account is the parameter `sys.user.initPassword`,
 | `RUSTRBAC_ALLOW_REMOTE` | unset. Set `yes` before binding a non-loopback address |
 | `RUSTRBAC_LANG` | unset. One of the thirteen menu codes. It does not write the language file |
 | `RUSTRBAC_HOME` | unset. Overrides `~/.local/RustRbac` |
+| `RUSTRBAC_THEME` | `vue3`. The other value is `adminlte`. A non-empty environment value wins over the settings file |
 
 ## Screenshots
 
-These are captures of the running text menu.
+These are captures of the running text menu at 1.1.0. The status line now shows the version from `Cargo.toml`. The server board also has row 24, theme.
+
+Choose the page skin with `rust-rbac theme`. Enter selects vue3. Choice 2 selects adminlte. That command does not open the database. The same question is server row 24. The pages stay plain HTML. vue3 links `/element-plus.css` and `/rustrbac.css`. adminlte links `/adminlte.css`. There is no script.
 
 ![Front board](https://raw.githubusercontent.com/cloudgen/RustRbac/main/screenshots/main-menu-en.png)
 
@@ -296,7 +303,7 @@ These are captures of the running text menu.
 
 ![Server](https://raw.githubusercontent.com/cloudgen/RustRbac/main/screenshots/server-menu.png)
 
-*Server. The rows are setup, audit, and serve. Back says return to the main menu. The status title is server.*
+*Server, captured at 1.1.0. The rows in the picture are setup, audit, and serve. The board now also has row 24, theme. Back says return to the main menu. The status title is server.*
 
 ![Setup](https://raw.githubusercontent.com/cloudgen/RustRbac/main/screenshots/setup-menu.png)
 

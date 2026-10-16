@@ -29,7 +29,7 @@ Self-management copy still says cargo. Empty arguments still use the current eng
 ## Left as they were
 
 - The 2026-10-11 reviews record the previous board. They were not rewritten.
-- `src/PyRbac` and `tests/test_*.py` are the previous edition. `tests/run.sh` does not start them. Their menu numbers were not moved.
+- The retired Python package and `tests/test_*.py` were removed later on 2026-10-14. This menu review did not move their numbers. `tests/run.sh` starts `cargo test` only.
 - Screenshot PNG files were recaptured from the running menu on 2026-10-14. The README captions name the words on those pictures. The server board is `screenshots/server-menu.png`. The old session board file is not part of this menu.
 - `sqlite_seed_scope_and_web` and `mysql_test_database_when_the_password_file_is_present` were not run again.
 

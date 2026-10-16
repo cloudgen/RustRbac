@@ -10,7 +10,7 @@
 | Check | Result |
 |-------|--------|
 | Sole Active domain is `requirement-domain-rust-rbac` | Pass. 20 Active requirement files. `requirement-local-login` is not a second domain |
-| Python requirements and `requirement-domain-pyrbac` are Retired, not deleted | Pass |
+| Python requirements and `requirement-domain-pyrbac` were Retired on this date | Pass on 2026-10-11. Those files were removed on 2026-10-14 |
 | `requirement-database` Active 2.0.1 names `rust_rbac` and refuses the old schema names | Pass |
 | Operator data scope 3 sees only `operator` | Pass |
 | Lead data scope 4 sees admin, clerk, and lead | Pass |
@@ -25,7 +25,7 @@
 | Menu rows 2–9, no session row, language 41–53, cargo on the self-management row | Pass |
 | Help names cargo and `rust-rbac`, and does not name `py-rbac` or a registry publish | Pass |
 | mysql `rust_rbac_test` seeds once and then reports present | Pass |
-| `src/PyRbac` remains on disk | Pass |
+| `src/PyRbac` was still on disk on this date | Pass on 2026-10-11. The package was removed on 2026-10-14 |
 | About cache lines are the private leaf `cache/cache-RustRbac-…`. Persistence is `~/.local/RustRbac`. The page does not create the leaf | Pass |
 
 ## Limits

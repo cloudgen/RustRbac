@@ -34,7 +34,7 @@ Do not `cargo publish`. This product does not claim a crates.io publish.
 | Command | Behavior |
 |---------|----------|
 | `help` | Print the closed set. Exit 0. |
-| `version` | Print the `Cargo.toml` version `1.1.0`. |
+| `version` | Print the `Cargo.toml` version `1.1.1`. |
 | `setup` | `cargo fetch` |
 | `clean` | Remove the Cargo `target/` directory. Do not remove `src/`, `reviews/`, or `screenshots/`. |
 | `build` | `cargo build --release` |

@@ -1,6 +1,6 @@
 # RustRbac test plan — 2026-10-11
 
-Run `tests/run.sh` or `cargo test` from the repository root. The ship suite is `tests/product.rs`. Python `tests/test_*.py` is the previous edition and is not started by `tests/run.sh`.
+Run `tests/run.sh` or `cargo test` from the repository root. The ship suite is `tests/product.rs`. The earlier Python tests were removed.
 
 The mysql case runs only when `~/.local/RustRbac/database` is mode 0600. It reads the password, connects as `rust_rbac` to `rust_rbac_test`, and drops only `sys_*` tables in that schema. It does not open `pyrbac`, `pyrbac_test`, `ruoyi`, `ruoyi_db`, or `ry`.
 
@@ -8,7 +8,8 @@ The mysql case runs only when `~/.local/RustRbac/database` is mode 0600. It read
 |----|--------|----------------------|
 | TP-ENV-01 | Mode 0600 file, empty environment does not win, non-empty environment wins, remote bind refused, denied database names | Pass in `password_file_mode_remote_and_denied_names` |
 | TP-CLI-01 | `PRODUCT_VERBS` excludes `hello`, `join`, `list-videos`, and `language`. `db-engine` is not a domain verb. Empty argv opens the text screen only on a terminal | Pass in `cli_gate_and_front_rows` |
-| TP-MENU-01 | Front numbers 1, 2, 3, 6, 7, and 9. Row 1 is rbac. Row 2 is server. Numbers 4, 5, and 8 are not rows. No session row. Setup Back returns to server. `access` opens rbac | Pass in `cli_gate_and_front_rows` on 2026-10-14 |
+| TP-MENU-01 | Front numbers 1, 2, 3, 6, 7, and 9. Row 1 is rbac. Row 2 is server. Numbers 4, 5, and 8 are not rows. No session row. Setup Back returns to server. `access` opens rbac. Rows 18 and 19 are menu-list and menu-add. menu-edit, menu-remove, and menu-sort are not rows and not verbs | Pass in `cli_gate_and_front_rows` on 2026-10-15 |
+| TP-MENU-02 | Menu list, add, edit, remove, and save sort. The menus page keeps Add, Edit, Save sort, Choose, and Remove for an administrator, and omits edit when that permission is absent | Pass in `menu_records_and_page` |
 | TP-LANG-01 | Codes 71–83, reserved 70 and 84, leaf mode 0600, directory mode 0700, `RUSTRBAC_LANG` does not write, failed save keeps `zh-Hant` | Pass in `menu_language_save_and_path_width` on 2026-10-14 |
 | TP-TUI-10 | Display width and the zh-Hans / zh-Hant front board. Self-management says cargo | Pass in `front_board_alignment_uses_cargo` |
 | TP-ABOUT | Identity, host tools, star box, no `--json`, no `py-rbac`. Cache lines are the private leaf `cache/cache-RustRbac-…`. Persistence is `{home}/.local/RustRbac`. The page does not create that leaf | Pass in `about_page_and_docs_identity` and `cache_leaf_is_private_and_skips_the_parent` |

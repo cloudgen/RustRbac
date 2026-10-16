@@ -1,5 +1,6 @@
 //! RBAC commands shared by the terminal and the web interface.
 //! requirement-rbac — users, roles, menus, departments, posts, data scope.
+//! requirement-rbac-menu — list, add, and the page actions edit, remove, and save sort.
 //! requirement-domain-rust-rbac — one permission path.
 
 use std::collections::HashMap;
@@ -657,7 +658,8 @@ impl Access {
 
     pub fn menus_unscoped(&self) -> Result<Vec<HashMap<String, String>>, AppError> {
         self.store.query_all(
-            "SELECT menu_id, parent_id, menu_name, menu_type, perms
+            "SELECT menu_id, parent_id, menu_name, menu_type, perms,
+                   order_num, path, visible
             FROM sys_menu
             WHERE status = '0'
             ORDER BY parent_id, order_num, menu_id",
@@ -714,6 +716,199 @@ impl Access {
         self.audit
             .write_oper(actor, "Menu", 1, "menu_add", 0, "", name)?;
         Ok(done.lastrowid)
+    }
+
+    pub fn menu_edit(
+        &self,
+        actor: &HashMap<String, String>,
+        menu_id: &str,
+        menu_name: &str,
+        parent_id: &str,
+        menu_type: &str,
+        perms: &str,
+        path: &str,
+        visible: &str,
+    ) -> Result<i64, AppError> {
+        self.require(actor, "system:menu:edit")?;
+        let current = self.menu_open(menu_id)?;
+        let name = menu_name.trim();
+        if name.is_empty() || name.chars().count() > 50 {
+            return Err(AppError::new("menu_name is required.", "set --menu-name"));
+        }
+        if !matches!(menu_type, "M" | "C" | "F") {
+            return Err(AppError::new(
+                "menu_type must be M, C, or F.",
+                "M directory, C page, F button",
+            ));
+        }
+        let Some(parent) = whole_digits(parent_id) else {
+            return Err(AppError::new(
+                format!("Unknown parent menu {parent_id}."),
+                "rust-rbac menu-list",
+            ));
+        };
+        if parent != 0 {
+            let found = self.store.query_one(
+                "SELECT menu_id FROM sys_menu WHERE menu_id = ?",
+                &[Arg::from(parent)],
+            )?;
+            if found.is_none() {
+                return Err(AppError::new(
+                    format!("Unknown parent menu {parent_id}."),
+                    "rust-rbac menu-list",
+                ));
+            }
+        }
+        let ident = field(&current, "menu_id").parse::<i64>().unwrap_or(0);
+        if self.menu_under(ident, parent)? {
+            return Err(AppError::new(
+                "A menu cannot sit under itself.",
+                "choose another parent",
+            ));
+        }
+        let shown = visible.trim();
+        let shown = if shown.is_empty() { "0" } else { shown };
+        if shown != "0" && shown != "1" {
+            return Err(AppError::new("visible must be 0 or 1.", "0 show, 1 hide"));
+        }
+        self.store.execute(
+            "UPDATE sys_menu
+            SET menu_name = ?, parent_id = ?, menu_type = ?, perms = ?,
+                path = ?, visible = ?, update_by = ?, update_time = NOW()
+            WHERE menu_id = ?",
+            &[
+                Arg::from(name),
+                Arg::from(parent),
+                Arg::from(menu_type),
+                Arg::from(perms),
+                Arg::from(path),
+                Arg::from(shown),
+                Arg::from(field(actor, "user_name")),
+                Arg::from(ident),
+            ],
+        )?;
+        self.audit
+            .write_oper(actor, "Menu", 2, "menu_edit", 0, "", name)?;
+        Ok(ident)
+    }
+
+    pub fn menu_remove(
+        &self,
+        actor: &HashMap<String, String>,
+        menu_id: &str,
+    ) -> Result<i64, AppError> {
+        self.require(actor, "system:menu:remove")?;
+        let current = self.menu_open(menu_id)?;
+        let ident = field(&current, "menu_id").parse::<i64>().unwrap_or(0);
+        let child = self.store.query_one(
+            "SELECT menu_id FROM sys_menu WHERE parent_id = ? AND status = '0'",
+            &[Arg::from(ident)],
+        )?;
+        if child.is_some() {
+            return Err(AppError::new(
+                "That menu has children.",
+                "remove the children first",
+            ));
+        }
+        self.store.execute(
+            "DELETE FROM sys_role_menu WHERE menu_id = ?",
+            &[Arg::from(ident)],
+        )?;
+        self.store
+            .execute("DELETE FROM sys_menu WHERE menu_id = ?", &[Arg::from(ident)])?;
+        self.audit.write_oper(
+            actor,
+            "Menu",
+            3,
+            "menu_remove",
+            0,
+            "",
+            field(&current, "menu_name"),
+        )?;
+        Ok(ident)
+    }
+
+    pub fn menu_sort(
+        &self,
+        actor: &HashMap<String, String>,
+        menu_ids: &[String],
+        order_nums: &[String],
+    ) -> Result<i64, AppError> {
+        self.require(actor, "system:menu:edit")?;
+        if menu_ids.len() != order_nums.len() {
+            return Err(AppError::new(
+                "Choose a sort for each menu.",
+                "send one order for each menu",
+            ));
+        }
+        let mut pairs = Vec::new();
+        for (raw_id, raw_order) in menu_ids.iter().zip(order_nums.iter()) {
+            let current = self.menu_open(raw_id)?;
+            let number = menu_order(raw_order)?;
+            let ident = field(&current, "menu_id").parse::<i64>().unwrap_or(0);
+            pairs.push((number, ident));
+        }
+        for (number, ident) in &pairs {
+            self.store.execute(
+                "UPDATE sys_menu
+                SET order_num = ?, update_by = ?, update_time = NOW()
+                WHERE menu_id = ?",
+                &[
+                    Arg::from(*number),
+                    Arg::from(field(actor, "user_name")),
+                    Arg::from(*ident),
+                ],
+            )?;
+        }
+        let count = pairs.len() as i64;
+        self.audit
+            .write_oper(actor, "Menu", 2, "menu_sort", 0, "", &count.to_string())?;
+        Ok(count)
+    }
+
+    fn menu_open(&self, menu_id: &str) -> Result<HashMap<String, String>, AppError> {
+        let Some(ident) = whole_digits(menu_id) else {
+            return Err(AppError::new(
+                format!("Unknown menu {menu_id}."),
+                "rust-rbac menu-list",
+            ));
+        };
+        let row = self.store.query_one(
+            "SELECT menu_id, parent_id, menu_name, menu_type, perms,
+                   order_num, path, visible, status
+            FROM sys_menu
+            WHERE menu_id = ? AND status = '0'",
+            &[Arg::from(ident)],
+        )?;
+        row.ok_or_else(|| {
+            AppError::new(
+                format!("Unknown menu {menu_id}."),
+                "rust-rbac menu-list",
+            )
+        })
+    }
+
+    fn menu_under(&self, menu_id: i64, parent_id: i64) -> Result<bool, AppError> {
+        if parent_id == 0 || parent_id == menu_id {
+            return Ok(parent_id == menu_id);
+        }
+        let mut seen = std::collections::HashSet::new();
+        let mut current = parent_id;
+        while current != 0 && seen.insert(current) {
+            let row = self.store.query_one(
+                "SELECT parent_id FROM sys_menu WHERE menu_id = ?",
+                &[Arg::from(current)],
+            )?;
+            let Some(row) = row else {
+                return Ok(false);
+            };
+            let next = field(&row, "parent_id").parse::<i64>().unwrap_or(0);
+            if next == menu_id {
+                return Ok(true);
+            }
+            current = next;
+        }
+        Ok(false)
     }
 
     pub fn dept_list(
@@ -855,6 +1050,34 @@ impl Access {
             admin
         ))
     }
+}
+
+fn whole_digits(raw: &str) -> Option<i64> {
+    let text = raw.trim();
+    if text.is_empty() || !text.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    text.parse().ok()
+}
+
+fn menu_order(raw: &str) -> Result<i64, AppError> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return Ok(0);
+    }
+    let Some(number) = whole_digits(text) else {
+        return Err(AppError::new(
+            "order_num must be a number.",
+            "use a whole number from 0 to 9999",
+        ));
+    };
+    if number > 9999 {
+        return Err(AppError::new(
+            "order_num must be a number.",
+            "use a whole number from 0 to 9999",
+        ));
+    }
+    Ok(number)
 }
 
 fn token_urlsafe(nbytes: usize) -> String {

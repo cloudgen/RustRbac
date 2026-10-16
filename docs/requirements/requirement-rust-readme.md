@@ -1,12 +1,12 @@
 **file**: docs/requirements/requirement-rust-readme.md
-**Status**: Active (Version 1.0.1)
+**Status**: Active (Version 1.0.2)
 **Area**: rust
 **Key**: `requirement-rust-readme`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
 
-The root `README.md` is the public user document for RustRbac. Its version matches `Cargo.toml` `1.1.0`. Every screenshot is an absolute `https://raw.githubusercontent.com/cloudgen/RustRbac/main/screenshots/<file>.png` link. The pictures are captures of the running text menu.
+The root `README.md` is the public user document for RustRbac. Its version badge matches `Cargo.toml` `1.1.1`. Every screenshot is an absolute `https://raw.githubusercontent.com/cloudgen/RustRbac/main/screenshots/<file>.png` link. The pictures are captures of the running text menu at 1.1.0.
 
 ### 1.1 Human-facing
 
@@ -26,7 +26,7 @@ Features, Advantages, Quick Installation, Usage, Screenshots, Examples, Platform
 
 ## 3. Normative rules
 
-1. **Identity.** The document **MUST** name RustRbac, the binary `rust-rbac`, and version `1.1.0`. It **MUST NOT** claim a crates.io publish. Self-management copy **MUST** say cargo, not pip.
+1. **Identity.** The document **MUST** name RustRbac, the binary `rust-rbac`, and version `1.1.1`. It **MUST NOT** claim a crates.io publish. Self-management copy **MUST** say cargo, not pip. A screenshot caption **MAY** name the version printed in that capture.
 2. **Images.** A picture **MUST** use `https://raw.githubusercontent.com/cloudgen/RustRbac/main/screenshots/<file>.png`. A relative link written as `](screenshots/` **MUST NOT** appear.
 3. **Seed.** The document **MUST** list the four seed accounts from `requirement-domain-rust-rbac` and **MUST** tell the operator to change those passwords.
 4. **Storage.** The document **MUST** say passwords are PBKDF2 `pbkdf2_sha256` with 260000 iterations rather than bcrypt, sessions are `sys_session` rather than Redis, and data scope is 1–4.
@@ -42,7 +42,7 @@ Features, Advantages, Quick Installation, Usage, Screenshots, Examples, Platform
 |----|-------|
 | AC-1 | The eleven headings in section 2 remain, in that order |
 | AC-2 | Screenshot links are the absolute raw URL, and `](screenshots/` does not appear |
-| AC-3 | The version shown is `1.1.0` and the binary is `rust-rbac` |
+| AC-3 | The version badge is `1.1.1` and the binary is `rust-rbac` |
 | AC-4 | The document does not claim a crates.io publish |
 
 ## Terminologies
@@ -59,9 +59,10 @@ Features, Advantages, Quick Installation, Usage, Screenshots, Examples, Platform
 | 2026-10-11 | Active 1.0.0 | RustRbac README. Absolute screenshot URLs. Version 1.1.0 |
 | 2026-10-11 | Active 1.0.1 | Empty argv tries the saved sign-in and asks for the account only when that is missing or rejected |
 | 2026-10-14 | Active 1.0.1 | README pictures are captures of the current menu, including the server board |
+| 2026-10-16 | Active 1.0.2 | Version badge 1.1.1. The pictures stay the 1.1.0 captures. Server row 24 is named in the text |
 
 ---
 
-**Last Updated**: 2026-10-14
+**Last Updated**: 2026-10-16
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

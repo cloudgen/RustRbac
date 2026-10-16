@@ -1,12 +1,12 @@
 **file**: docs/requirements/requirement-rust-modules.md
-**Status**: Active (Version 1.0.1)
+**Status**: Active (Version 1.0.2)
 **Area**: rust
 **Key**: `requirement-rust-modules`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
 
 ## 1. Purpose
 
-The ship unit is a Rust crate. One concern lives in one file under `src/*.rs`. `src/lib.rs` declares the modules. `src/main.rs` is the binary entry and the `StatusLog::open` construct. Python sources under `src/PyRbac` are not modules of this crate.
+The ship unit is a Rust crate. One concern lives in one file under `src/*.rs`. `src/lib.rs` declares the modules. `src/main.rs` is the binary entry and the `StatusLog::open` construct. This crate has no Python package.
 
 ### 1.1 Human-facing
 
@@ -48,7 +48,7 @@ The ship unit is a Rust crate. One concern lives in one file under `src/*.rs`. `
 
 1. **One concern.** A file under `src/*.rs` **MUST** own one concern from the map. A second product concern **MUST NOT** be added beside it.
 2. **Crate.** `src/lib.rs` **MUST** declare the modules the binary uses. The binary name is `rust-rbac`.
-3. **Not the Python tree.** `src/PyRbac` **MUST NOT** be compiled as this crate. It remains on disk and is not the ship unit.
+3. **No Python package.** This tree **MUST NOT** contain `src/PyRbac`, `pyproject.toml`, or a Python module compiled as this crate. The ship unit is the Rust crate.
 4. **Logger.** Only `src/main.rs` constructs `StatusLog::open`. `src/log.rs` defines `StatusLog` and does not open it as a second product entry.
 5. **Errors.** `src/error.rs` defines `AppError` and does not dispatch verbs.
 
@@ -58,7 +58,7 @@ The ship unit is a Rust crate. One concern lives in one file under `src/*.rs`. `
 |----|-------|
 | AC-1 | Each mapped concern has its own `src/*.rs` file |
 | AC-2 | `src/lib.rs` declares those modules |
-| AC-3 | `src/PyRbac` is not a crate module |
+| AC-3 | `src/` has no Python package and no `pyproject.toml` |
 | AC-4 | `StatusLog::open` is called from `src/main.rs` |
 
 ## Terminologies
@@ -74,9 +74,10 @@ The ship unit is a Rust crate. One concern lives in one file under `src/*.rs`. `
 |------|--------|------|
 | 2026-10-11 | Active 1.0.0 | One Rust concern per `src/*.rs` file. Python tree is not the crate |
 | 2026-10-11 | Active 1.0.1 | `src/local_login.rs` owns the saved terminal sign-in. `StatusLog::open` stays in `src/main.rs` |
+| 2026-10-14 | Active 1.0.2 | The retired Python package is not in this tree |
 
 ---
 
-**Last Updated**: 2026-10-11
+**Last Updated**: 2026-10-14
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).

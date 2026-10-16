@@ -48,6 +48,7 @@ pub struct VerbOptions {
     pub content: String,
     pub token: String,
     pub engine: String,
+    pub theme: String,
     pub force: bool,
 }
 
@@ -221,6 +222,14 @@ impl Desk {
         self.settings.lock().expect("settings").apply_choice(token)
     }
 
+    pub fn apply_theme(&self, token: &str) -> Result<String, AppError> {
+        self.settings.lock().expect("settings").apply_theme(token)
+    }
+
+    pub fn theme_lines(&self) -> Vec<String> {
+        self.settings.lock().expect("settings").theme_lines()
+    }
+
     pub fn engine_choice_lines(&self) -> Result<Vec<String>, AppError> {
         self.settings.lock().expect("settings").choice_lines()
     }
@@ -228,6 +237,9 @@ impl Desk {
     pub fn execute(&self, verb: &str, options: &VerbOptions) -> Result<String, AppError> {
         if verb == "db-engine" {
             return self.apply_engine(&options.engine);
+        }
+        if verb == "theme" {
+            return self.apply_theme(&options.theme);
         }
         if verb == "db-init" {
             return self.db_init();

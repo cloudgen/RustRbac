@@ -1,6 +1,7 @@
 //! Process settings.
 //! requirement-environment — RUSTRBAC_* names, the mode-0600 file, loopback bind.
 //! requirement-database — sqlite3 file rust_rbac.sqlite3, mysql database rust_rbac.
+//! requirement-html-theme — vue3 or adminlte. This file does not open the database.
 
 use std::collections::HashMap;
 use std::fs;
@@ -17,6 +18,7 @@ pub const PRODUCT_DB: &str = "rust_rbac";
 pub const TEST_DB: &str = "rust_rbac_test";
 
 const ENGINES: &[&str] = &["sqlite3", "mysql"];
+const THEMES: &[&str] = &["vue3", "adminlte"];
 const LOOPBACK: &[&str] = &["127.0.0.1", "localhost", "::1"];
 /// Names this product must not open. They belong to other products.
 const DENIED_DATABASES: &[&str] = &["pyrbac", "pyrbac_test", "ruoyi", "ruoyi_db", "ry"];
@@ -244,6 +246,86 @@ impl Settings {
                 "choose 1 for the sqlite3 file or 2 for mysql",
             ));
         }
+        self.write_setting("RUSTRBAC_DB_ENGINE", &engine, "choose the engine again")
+    }
+
+    pub fn theme(&mut self) -> Result<String, AppError> {
+        self.file_cache = None;
+        let value = self.get("RUSTRBAC_THEME").trim().to_ascii_lowercase();
+        if value.is_empty() {
+            return Ok("vue3".to_string());
+        }
+        if !THEMES.contains(&value.as_str()) {
+            return Err(AppError::new(
+                "RUSTRBAC_THEME must be vue3 or adminlte.",
+                "unset RUSTRBAC_THEME, or set vue3 or adminlte",
+            ));
+        }
+        Ok(value)
+    }
+
+    pub fn theme_lines(&self) -> Vec<String> {
+        vec![
+            "Theme. Enter uses vue3.".to_string(),
+            "1 vue3".to_string(),
+            "2 adminlte".to_string(),
+        ]
+    }
+
+    pub fn theme_sentence(&mut self) -> Result<String, AppError> {
+        Ok(format!("Theme: {}.", self.theme()?))
+    }
+
+    pub fn apply_theme(&mut self, token: &str) -> Result<String, AppError> {
+        let text = token.trim().to_ascii_lowercase();
+        let theme = if text.is_empty() || text == "1" || text == "vue3" {
+            "vue3"
+        } else if text == "2" || text == "adminlte" {
+            "adminlte"
+        } else {
+            return Err(AppError::new(
+                "The theme must be vue3 or adminlte.",
+                "choose 1 for vue3 or 2 for adminlte",
+            ));
+        };
+        let env = self
+            .environ
+            .get("RUSTRBAC_THEME")
+            .cloned()
+            .unwrap_or_default();
+        let env = env.trim().to_ascii_lowercase();
+        if !env.is_empty() {
+            if !THEMES.contains(&env.as_str()) {
+                return Err(AppError::new(
+                    "RUSTRBAC_THEME must be vue3 or adminlte.",
+                    "unset RUSTRBAC_THEME, or set vue3 or adminlte",
+                ));
+            }
+            if env != theme {
+                return Err(AppError::new(
+                    "RUSTRBAC_THEME is set in the environment.",
+                    "unset RUSTRBAC_THEME to store the choice in the database file",
+                ));
+            }
+            let sentence = self.theme_sentence()?;
+            return Ok(format!("{sentence} The environment wins."));
+        }
+        self.save_theme(theme)?;
+        self.theme_sentence()
+    }
+
+    pub fn save_theme(&mut self, theme: &str) -> Result<(), AppError> {
+        let theme = theme.trim().to_ascii_lowercase();
+        if !THEMES.contains(&theme.as_str()) {
+            return Err(AppError::new(
+                "The theme must be vue3 or adminlte.",
+                "choose 1 for vue3 or 2 for adminlte",
+            ));
+        }
+        self.write_setting("RUSTRBAC_THEME", &theme, "choose the theme again")
+    }
+
+    fn write_setting(&mut self, key: &str, value: &str, again: &str) -> Result<(), AppError> {
         let folder = self.app_home();
         if folder.is_empty() {
             return Err(AppError::new(
@@ -254,7 +336,7 @@ impl Settings {
         fs::create_dir_all(&folder).map_err(|_| {
             AppError::new(
                 "The home folder could not be created.",
-                "check RUSTRBAC_HOME, then choose the engine again",
+                format!("check RUSTRBAC_HOME, then {again}"),
             )
         })?;
         let _ = fs::set_permissions(&folder, mode_perm(0o700));
@@ -273,7 +355,7 @@ impl Settings {
             let text = fs::read_to_string(&path).map_err(|_| {
                 AppError::new(
                     "The database file could not be read.",
-                    "check the database file, then choose the engine again",
+                    format!("check the database file, then {again}"),
                 )
             })?;
             lines = text.lines().map(|line| line.to_string()).collect();
@@ -281,19 +363,19 @@ impl Settings {
         let mut found = false;
         let mut rewritten = Vec::new();
         for line in lines {
-            let key = line
+            let line_key = line
                 .split_once('=')
-                .map(|(key, _)| key.trim())
+                .map(|(item, _)| item.trim())
                 .unwrap_or("");
-            if key == "RUSTRBAC_DB_ENGINE" {
-                rewritten.push(format!("RUSTRBAC_DB_ENGINE={engine}"));
+            if line_key == key {
+                rewritten.push(format!("{key}={value}"));
                 found = true;
             } else {
                 rewritten.push(line);
             }
         }
         if !found {
-            rewritten.push(format!("RUSTRBAC_DB_ENGINE={engine}"));
+            rewritten.push(format!("{key}={value}"));
         }
         let payload = rewritten.join("\n") + "\n";
         atomic_private(&path, payload.as_bytes())?;

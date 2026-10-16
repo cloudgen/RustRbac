@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-domain-rust-rbac.md
-**Status**: Active (Version 1.0.2)
+**Status**: Active (Version 1.0.3)
 **Area**: domain
 **Key**: `requirement-domain-rust-rbac`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -8,7 +8,7 @@
 
 This requirement is the domain surface for RustRbac. The product is online role-based access control and centralized configuration. The same actions are available from the text menu, from typed verbs, and from the local web pages.
 
-RustRbac owns users, roles, menus, departments, posts, dictionaries, parameters, notices, and audit records. The ship unit is the Rust binary `rust-rbac`. Python sources under `src/PyRbac` are not the ship unit.
+RustRbac owns users, roles, menus, departments, posts, dictionaries, parameters, notices, and audit records. The ship unit is the Rust binary `rust-rbac`.
 
 This file is the sole Active `requirement-domain-*`.
 
@@ -56,7 +56,7 @@ The seeded notice text **MUST** be `RustRbac is ready.`
 7. **Protected rows.** User 1 **MUST NOT** be removed or disabled. Role 1 **MUST NOT** be edited through role-grant.
 8. **Sign-in sentences.** An unknown account or a wrong password **MUST** be `Unknown account or wrong password.` A signed-out action **MUST** be `Not signed in.`
 9. **whoami.** The `whoami` text for an account whose role key is `admin` **MUST** contain `admin=yes`.
-10. **Sole domain.** `requirement-domain-pyrbac`, `requirement-domain-videojoin`, and `requirement-video-ffmpeg-pipeline` stay Retired.
+10. **Sole domain.** `requirement-domain-videojoin` and `requirement-video-ffmpeg-pipeline` stay Retired. The PyRbac domain file is not in this tree.
 11. **Saved sign-in.** The encrypted terminal sign-in is `requirement-local-login`. This file does not define that ciphertext.
 
 ## 3. Acceptance checks
@@ -88,6 +88,7 @@ The seeded notice text **MUST** be `RustRbac is ready.`
 | 2026-10-11 | Active 1.0.0 | RustRbac domain. The PyRbac domain file is Retired |
 | 2026-10-11 | Active 1.0.1 | Saved terminal sign-in points at `requirement-local-login`. This file stays the sole Active domain |
 | 2026-10-14 | Active 1.0.2 | The text menu opens rbac on row 1 and server on row 2 |
+| 2026-10-14 | Active 1.0.3 | The PyRbac domain file is removed. The video domain files stay Retired |
 
 ---
 

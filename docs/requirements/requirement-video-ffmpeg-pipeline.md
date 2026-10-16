@@ -25,7 +25,7 @@ The welcome line is `requirement-domain-videojoin`. Do not treat the historical 
 
 1. **MUST NOT** invoke `ffmpeg` or any other encoder from this product.
 2. **MUST NOT** write a concat list, a media intermediate, or a joined output file.
-3. **MUST NOT** restore `src/PyRbac/join.py` without an explicit user order and a new Active revision of `requirement-domain-videojoin`.
+3. **MUST NOT** restore a join module, or a Python package that concatenates media, without an explicit user order and a new Active revision of `requirement-domain-videojoin`.
 4. A missing `ffmpeg` binary is not an error. The front board and `hello` do not check for it.
 
 ## 4. Protection Rule (Sacred)
@@ -48,6 +48,7 @@ The welcome line is `requirement-domain-videojoin`. Do not treat the historical 
 | 2026-10-04 | Active 1.2.0 | Fail-closed re-encode stayed |
 | 2026-10-05 | Retired 1.3.0 | Encoder support removed with the join |
 | 2026-10-11 | Retired 1.3.0 | Current product is RustRbac. This file stays retired |
+| 2026-10-14 | Retired 1.3.0 | Rule 3 no longer names a Python path. The join stays retired |
 
 ---
 

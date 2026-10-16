@@ -1,5 +1,5 @@
 **file**: docs/requirements/requirement-rbac.md
-**Status**: Active (Version 1.3.2)
+**Status**: Active (Version 1.3.3)
 **Area**: domain
 **Key**: `requirement-rbac`
 **Philosophy**: CIAO **v2.10.2** / CIAO-Lite (Caution • Intentional • Anti-fragile • Over-engineered / Over-protect)
@@ -40,7 +40,7 @@ The text menu, the typed commands, and the local web pages call one service, `De
 
 The terminal token is the mode-0600 file `session` under the application home (`~/.local/RustRbac` unless `RUSTRBAC_HOME` is set). The web token is the cookie `rust_rbac_session`. Both tokens are rows in `sys_session`. A file that is not mode `0600` is treated as signed out. The path and the bind rules are `requirement-environment`. The cookie flags are `requirement-web-interface`. The saved sign-in files are `requirement-local-login`. Those files are not the web cookie.
 
-`StatusLog::open` in `src/main.rs` writes the status file. The logger is in-process. It is not ChronicleLogger. It is not `sys_oper_log`, and it does not store a password or argv. The construct is `requirement-rust-logging`. The ship language is Rust. The binary is `rust-rbac`. The product version is 1.1.0.
+`StatusLog::open` in `src/main.rs` writes the status file. The logger is in-process. It is not ChronicleLogger. It is not `sys_oper_log`, and it does not store a password or argv. The construct is `requirement-rust-logging`. The ship language is Rust. The binary is `rust-rbac`. The product version is 1.1.1.
 
 ```mermaid
 flowchart TB
@@ -107,7 +107,7 @@ Scope 4 matches the account's department and departments whose `ancestors` conta
 
 ### 1.4 Records
 
-A permission string is `sys_menu.perms`. The account reaches it through its roles. Data scope is `sys_role.data_scope`. Posts name a job. They do not grant a permission string and they do not widen data scope.
+A permission string is `sys_menu.perms`. The account reaches it through its roles. Data scope is `sys_role.data_scope`. Posts name a job. They do not grant a permission string and they do not widen data scope. The menu list, the menu add, and the page actions edit, remove, and save sort are `requirement-rbac-menu`.
 
 ```mermaid
 flowchart LR
@@ -189,9 +189,10 @@ Common menus are system, user list, user query, setup, parameter list, notice li
 | 2026-10-11 | Active 1.3.0 | Scope numbers and password storage are stated for this product |
 | 2026-10-11 | Active 1.3.1 | Product RustRbac 1.1.0. Binary `rust-rbac`. Prefix `RUSTRBAC_`. Rust store. `StatusLog::open` |
 | 2026-10-11 | Active 1.3.2 | Saved terminal sign-in points at `requirement-local-login` and is not the web cookie |
+| 2026-10-15 | Active 1.3.3 | Menu records point at `requirement-rbac-menu` |
 
 ---
 
-**Last Updated**: 2026-10-11
+**Last Updated**: 2026-10-15
 **Owner**: project maintainers
 **Alignment**: Registry `docs/requirements/index.md`; **CIAO** (https://github.com/cloudgen/ciao); CIAO-Lite (https://github.com/cloudgen/ciao-lite).
